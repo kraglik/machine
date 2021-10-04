@@ -1,44 +1,43 @@
 import json
 
 from dataclasses import dataclass
-from typing import Union
+from typing import Optional, Dict
 
 
-@dataclass(frozen=True)
 class Response:
-    body: any
-    status_code: int = 200
-    content_type: str = 'text/plain'
+    def __init__(
+            self,
+            body: any,
+            content_type: str,
+            headers: Optional[Dict[str, str]] = None,
+            cookies: Optional[Dict[str, str]] = None,
+            status_code: int = 200
+    ):
+        self._body = body
+        self._content_type = content_type
+        self._headers = headers or {}
+        self._cookies = cookies or {}
+        self._status_code = status_code
 
-    @staticmethod
-    def html(body: Union[str, bytes], status_code: int) -> 'Response':
-        if isinstance(body, str):
-            body = body.encode('utf-8')
+    @property
+    def body(self):
+        return self._body
 
-        return Response(
-            body=body,
-            status_code=status_code,
-            content_type='text/html'
-        )
+    @property
+    def content_type(self):
+        return self._content_type
 
-    @staticmethod
-    def text(body: Union[str, bytes], status_code: int) -> 'Response':
-        if isinstance(body, str):
-            body = body.encode('utf-8')
+    @property
+    def headers(self):
+        return self._headers
 
-        return Response(
-            body=body,
-            status_code=status_code,
-            content_type='text/plain'
-        )
+    @property
+    def cookies(self):
+        return self._cookies
 
-    @staticmethod
-    def json(body: any, status_code: int) -> 'Response':
-        return Response(
-            body=body,
-            status_code=status_code,
-            content_type='application/json'
-        )
+    @property
+    def status_code(self):
+        return self._status_code
 
     def bytes(self, encoding: str = 'utf-8') -> bytes:
         if isinstance(self.body, bytes):
@@ -50,3 +49,38 @@ class Response:
         else:
             return json.dumps(self.body).encode(encoding=encoding)
 
+
+class HTMLResponse(Response):
+    def __init__(
+            self,
+            body: any,
+            content_type: str = 'text/html',
+            headers: Optional[Dict[str, str]] = None,
+            cookies: Optional[Dict[str, str]] = None,
+            status_code: int = 200
+    ):
+        super().__init__(body, content_type, headers, cookies, status_code)
+
+
+class JSONResponse(Response):
+    def __init__(
+            self,
+            body: any,
+            content_type: str = 'application/json',
+            headers: Optional[Dict[str, str]] = None,
+            cookies: Optional[Dict[str, str]] = None,
+            status_code: int = 200
+    ):
+        super().__init__(body, content_type, headers, cookies, status_code)
+
+
+class TextResponse(Response):
+    def __init__(
+            self,
+            body: any,
+            content_type: str = 'text/plain',
+            headers: Optional[Dict[str, str]] = None,
+            cookies: Optional[Dict[str, str]] = None,
+            status_code: int = 200
+    ):
+        super().__init__(body, content_type, headers, cookies, status_code)

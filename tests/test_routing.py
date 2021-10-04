@@ -1,7 +1,8 @@
 import pytest
 
 from machine import Machine, Request, Response
-from machine.resources import RESTResource, JsonRPCResource
+from machine.resources import HttpResource, JsonRPCResource
+from machine.response import TextResponse
 
 app = Machine()
 
@@ -11,20 +12,21 @@ v1 = api.scope('/v1')
 v2 = api.scope('/v2')
 
 
-@v1.resource('echo', '/echo')
-class EchoResourceV1(RESTResource):
-    async def post(self, request: Request):
-        return Response(
-            body=await request.body(),
-            status_code=200,
-            content_type=request.content_type
-        )
+v1echo = v1.add_resource(HttpResource('echo', '/echo'))
+v1name = v1.add_resource(HttpResource('name', '/name/{name}$'))
 
 
-@v1.resource('name', '/name/{name}$')
-class NameResourceV1(RESTResource):
-    async def get(self, request: Request, name: str) -> Response:
-        return Response.text(name, status_code=200)
+@v1echo.post
+async def echo(request: Request):
+    return Response(
+        body=await request.body(),
+        content_type=request.content_type
+    )
+
+
+@v1name.get
+async def show_name(request: Request, name: str) -> Response:
+    return TextResponse(name)
 
 
 rpc = v2.add_resource(JsonRPCResource('json_rpc', '/public/jsonrpc'))

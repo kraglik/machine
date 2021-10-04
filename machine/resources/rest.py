@@ -6,21 +6,51 @@ from machine.exceptions.resource import MethodNotAllowedResourceError
 from machine.path import Path
 from machine.plugin import PluginResult
 from machine.resource import Resource
-from machine.response import Response
+from machine.response import Response, TextResponse
 from machine.request import Request
 
 
-class RESTResource(Resource):
+class HttpResource(Resource):
     def __init__(self, name: str, path: Union[str, Path]):
         super().__init__(name, path)
         self._method_table = {
-            'GET': partial(self.get),
-            'POST': partial(self.post),
-            'PUT': partial(self.put),
-            'UPDATE': partial(self.update),
-            'DELETE': partial(self.delete),
-            'HEAD': partial(self.head),
+            'GET': None,
+            'POST': None,
+            'PUT': None,
+            'UPDATE': None,
+            'DELETE': None,
+            'HEAD': None,
         }
+
+    def _method_setter(self, method: str) -> callable:
+        def wrapper(handler):
+            self._method_table[method] = handler
+            return handler
+        return wrapper
+
+    @property
+    def get(self):
+        return self._method_setter('GET')
+
+    @property
+    def post(self):
+        return self._method_setter('POST')
+
+    @property
+    def put(self):
+        return self._method_setter('PUT')
+
+    @property
+    def update(self):
+        return self._method_setter('UPDATE')
+
+    @property
+    def delete(self):
+        return self._method_setter('DELETE')
+
+    @property
+    def head(self):
+        return self._method_setter('HEAD')
 
     async def __call__(self, conn: Connection, params: dict) -> PluginResult:
         method = self._method_table.get(conn.method.value, None)
@@ -29,35 +59,16 @@ class RESTResource(Resource):
             result = await method(request=Request.from_conn(conn), **params)
 
             if isinstance(result, str):
-                await conn.send_text(
-                    body=result,
-                    status_code=200,
-                    headers=[('connection', b'close')]
-                )
-            elif isinstance(result, Response):
-                await conn.send_head(
-                    content_type=result.content_type,
-                    status_code=result.status_code,
-                    headers=[('connection', b'close')]
-                )
-                await conn.send_body(body=result.bytes())
+                result = TextResponse(body=result, status_code=200)
 
-        return conn, params
+            await conn.send_content(
+                body=result.bytes(),
+                content_type=result.content_type,
+                headers={**(result.headers or {}), 'connection': 'close'},
+                cookies=result.cookies,
+                status_code=result.status_code
+            )
 
-    async def get(self, *args, **kwargs) -> Response:
-        raise MethodNotAllowedResourceError()
+            return conn, params
 
-    async def post(self, *args, **kwargs) -> Response:
-        raise MethodNotAllowedResourceError()
-
-    async def put(self, *args, **kwargs) -> Response:
-        raise MethodNotAllowedResourceError()
-
-    async def update(self, *args, **kwargs) -> Response:
-        raise MethodNotAllowedResourceError()
-
-    async def head(self, *args, **kwargs) -> Response:
-        raise MethodNotAllowedResourceError()
-
-    async def delete(self, *args, **kwargs) -> Response:
         raise MethodNotAllowedResourceError()

@@ -208,8 +208,15 @@ class Connection:
             'more_body': False
         })
 
-    async def send_head(self, content_type: str, status_code: int, headers: List[Tuple[str, bytes]] = []):
-        self.__response_headers.update({header: value for header, value in headers})
+    async def send_head(
+            self,
+            content_type: str,
+            status_code: int,
+            headers: Dict[str, str] = {},
+            cookies: Dict[str, str] = {}
+    ):
+        self.__response_headers.update({k: v.encode('utf-8') for k, v in (headers or {}).items()})
+        self.__response_cookies.update({k: v.encode('utf-8') for k, v in (cookies or {}).items()})
 
         if not any(header == 'content-type' for header, _ in self.__response_headers.items()):
             self.__response_headers.update({'content-type': content_type.encode('utf-8')})
@@ -232,7 +239,7 @@ class Connection:
 
         self.__head_sent = True
 
-    async def send_html_head(self, status_code: int, headers: List[Tuple[str, bytes]] = []):
+    async def send_html_head(self, status_code: int, headers: Dict[str, str] = {}):
         await self.send_head(status_code=status_code, headers=headers, content_type='text/html')
 
     async def send_body(self, body: Union[str, bytes], encoding: str = 'utf-8', chunk_size_bytes: int = 512):
@@ -257,37 +264,31 @@ class Connection:
             self,
             body: Union[str, bytes],
             status_code: int,
-            headers: List[Tuple[str, bytes]],
-            content_type: Union[str, bytes],
+            content_type: str,
+            headers: Dict[str, str] = {},
+            cookies: Dict[str, str] = {},
             encoding: str = 'utf-8',
             chunk_size_bytes: int = 512
     ):
-        if not any(header == 'content-type' for header, _ in headers):
-            headers.append((
-                'content-type',
-                (content_type
-                 if isinstance(content_type, bytes)
-                 else content_type.encode(encoding)))
-            )
-
-        await self._send({
-            'type': SendEventType.HTTP_RESPONSE_START,
-            'status': status_code,
-            'headers': [
-                [header.encode('utf-8'), value]
-                for header, value in headers
-            ] + [[b'connection', b'close']]
-        })
-
-        self.__head_sent = True
-
-        await self.send_body(body, encoding, chunk_size_bytes)
+        assert isinstance(body, (str, bytes)), f"Got incompatible body type: {type(body)}"
+        await self.send_head(
+            content_type=content_type,
+            headers=headers,
+            cookies=cookies,
+            status_code=status_code
+        )
+        await self.send_body(
+            body=body,
+            encoding=encoding,
+            chunk_size_bytes=chunk_size_bytes
+        )
 
     async def send_text(
             self,
             body: str,
             status_code: int,
-            headers: List[Tuple[str, bytes]],
+            headers: Dict[str, str] = {},
+            cookies: Dict[str, str] = {},
             encoding: str = 'utf-8',
             chunk_size_bytes: int = 512
     ):
@@ -295,6 +296,7 @@ class Connection:
             body=body,
             status_code=status_code,
             headers=headers,
+            cookies=cookies,
             encoding=encoding,
             chunk_size_bytes=chunk_size_bytes,
             content_type='text/plain'
@@ -304,7 +306,8 @@ class Connection:
             self,
             body: str,
             status_code: int,
-            headers: List[Tuple[str, bytes]],
+            headers: Dict[str, str],
+            cookies: Dict[str, str],
             encoding: str = 'utf-8',
             chunk_size_bytes: int = 512
     ):
@@ -312,6 +315,7 @@ class Connection:
             body=body,
             status_code=status_code,
             headers=headers,
+            cookies=cookies,
             encoding=encoding,
             chunk_size_bytes=chunk_size_bytes,
             content_type='text/html'
@@ -321,7 +325,8 @@ class Connection:
             self,
             body: Union[bytes, str, object],
             status_code: int,
-            headers: List[Tuple[str, bytes]],
+            headers: Dict[str, str],
+            cookies: Dict[str, str],
             encoding: str = 'utf-8',
             chunk_size_bytes: int = 512
     ):
@@ -332,6 +337,7 @@ class Connection:
             body=body,
             status_code=status_code,
             headers=headers,
+            cookies=cookies,
             encoding=encoding,
             chunk_size_bytes=chunk_size_bytes,
             content_type='application/json'

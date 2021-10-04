@@ -1,43 +1,49 @@
 from example.infrastructure.db.database import Todos
 from machine import Request
-from machine.resources import RESTResource
+from machine.resources import HttpResource
 
 from example.api.scopes import api
-from machine.response import Response
+from machine.response import Response, JSONResponse
 
 
-@api.resource(name='hello', path='/todo$')
-class TodoResource(RESTResource):
-    async def get(self, request: Request, db: Todos) -> Response:
-        return Response.json(
-            {
-                "todos": db.all
-            },
-            status_code=200
-        )
+r = api.add_resource(HttpResource(name='hello', path='/todo$'))
 
-    async def post(self, request: Request, db: Todos) -> Response:
-        todo = await request.text()
 
-        db.add(todo)
+@r.get
+async def todo_list_get(request: Request, db: Todos) -> Response:
+    return JSONResponse(
+        {
+            "todos": db.all
+        },
+        status_code=200
+    )
 
-        return Response.json(
-            {
-                "todo": todo,
-                "status": "added"
-            },
-            status_code=200
-        )
 
-    async def delete(self, request: Request, db: Todos) -> Response:
-        todo = await request.text()
+@r.post
+async def todo_create(request: Request, db: Todos) -> Response:
+    todo = await request.text()
 
-        db.remove(todo)
+    db.add(todo)
 
-        return Response.json(
-            {
-                "todo": todo,
-                "status": "deleted"
-            },
-            status_code=200
-        )
+    return JSONResponse(
+        {
+            "todo": todo,
+            "status": "added"
+        },
+        status_code=200
+    )
+
+
+@r.delete
+async def todo_delete(request: Request, db: Todos) -> Response:
+    todo = await request.text()
+
+    db.remove(todo)
+
+    return JSONResponse(
+        {
+            "todo": todo,
+            "status": "deleted"
+        },
+        status_code=200
+    )

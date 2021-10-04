@@ -48,5 +48,5 @@ class DefaultErrorRenderer(ErrorRenderer):
         await conn.send_text(
             body=self.__errors[status_code],
             status_code=status_code,
-            headers=[]
+            headers={}
         )

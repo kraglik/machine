@@ -1,2 +1,2 @@
-from .rest import RESTResource
+from .rest import HttpResource
 from .jsonrpc import JsonRPCResource

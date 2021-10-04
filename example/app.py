@@ -3,7 +3,7 @@ import logging
 from machine import Machine
 
 from example.api.scopes import api
-from example.api.v1.rest import TodoResource
+from example.api.v1.rest import r as todo_resource
 
 logger = logging.getLogger(__name__)
 

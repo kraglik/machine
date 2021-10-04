@@ -70,7 +70,7 @@ class JsonRPCResource(Resource):
 
                 status_code = result.status_code
                 result = result.body
-            elif isinstance(result, (dict, float, int, str, bool, list)):
+            elif isinstance(result, (dict, float, int, str, bool, list)) or result is None:
                 status_code = 200
 
             await self._send_jsonrpc_response(
@@ -111,7 +111,8 @@ class JsonRPCResource(Resource):
                 "result": result
             }),
             status_code=status_code,
-            headers=[]
+            headers={'connection': 'close'},
+            cookies={}
         )
 
     async def _parse_request(self, conn: Connection):
