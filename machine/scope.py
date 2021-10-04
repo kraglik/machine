@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Union
 
 from machine.connection import Connection
 from machine.path import Path
@@ -11,12 +11,12 @@ from machine.utils import Either, Left, Right
 class Scope(Plugin):
     def __init__(
             self,
-            path: Path,
+            path: Union[str, Path],
             pipelines: List[Pipeline] = [],
             scopes: List['Scope'] = [],
             resources: List[Resource] = []
     ):
-        self._path = path
+        self._path = path if isinstance(path, Path) else Path(path)
         self._pipelines = pipelines.copy()
         self._scopes = scopes.copy()
         self._resources = resources.copy()
@@ -25,12 +25,12 @@ class Scope(Plugin):
     def path(self) -> Path:
         return self._path
 
-    def scope(self, path: Path) -> 'Scope':
+    def scope(self, path: Union[str, Path]) -> 'Scope':
         scope = Scope(path)
         self._scopes.append(scope)
         return scope
 
-    def resource(self, name: str, path: Path):
+    def resource(self, name: str, path: Union[str, Path]):
         def wrapper(r):
             self._resources.append(r(name, path))
         return wrapper

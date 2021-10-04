@@ -1,10 +1,10 @@
 from machine.resources import RESTResource
-from machine import start, Request, Response
+from machine import Request, Response
 
 from example.api.scopes import api
 
 
-@api.resource(name='docs_v1', path=start/'docs'/'v1')
+@api.resource(name='docs_v1', path='/docs/v1')
 class APIV1Docs(RESTResource):
     async def get(self, request: Request) -> Response:
         return Response.html(

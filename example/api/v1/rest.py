@@ -1,13 +1,12 @@
 from example.infrastructure.db.database import Database
 from machine import Request
 from machine.resources import RESTResource
-from machine import start, slug, end
 
 from example.api.scopes import api_v1
 from machine.response import Response
 
 
-@api_v1.resource(name='hello', path=start/'hello'/slug('name') + end)
+@api_v1.resource(name='hello', path='/hello/{name}$')
 class HelloResource(RESTResource):
     async def get(self, request: Request, name: str, db: Database) -> Response:
         return Response.html(
@@ -20,7 +19,7 @@ class HelloResource(RESTResource):
         )
 
 
-@api_v1.resource(name='echo', path=start/'echo' + end)
+@api_v1.resource(name='echo', path='/echo$')
 class EchoResource(RESTResource):
     async def post(self, request: Request, db: Database) -> Response:
         return Response(
@@ -30,7 +29,7 @@ class EchoResource(RESTResource):
         )
 
 
-@api_v1.resource(name='query', path=start/'query_params' + end)
+@api_v1.resource(name='query', path='/query_params$')
 class QueryParamsResource(RESTResource):
     async def get(self, request: Request, db: Database) -> Response:
         return Response.html(

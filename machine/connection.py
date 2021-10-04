@@ -220,7 +220,7 @@ class Connection:
         ]
 
         response_cookies = [
-            [b'cookie', name.encode('utf-8') + b'=' + value]
+            [b'set-cookie', name.encode('utf-8') + b'=' + value]
             for name, value in self.__response_cookies.items()
         ]
 

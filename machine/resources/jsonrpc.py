@@ -1,6 +1,6 @@
 import json
 from dataclasses import dataclass
-from typing import Dict
+from typing import Dict, Union
 
 from machine.connection import Connection
 from machine.enums import HTTPMethod
@@ -20,7 +20,7 @@ class JsonRPCMethod:
 
 
 class JsonRPCResource(Resource):
-    def __init__(self, name: str, path: Path):
+    def __init__(self, name: str, path: Union[str, Path]):
         super().__init__(name, path)
         self._methods: Dict[str, JsonRPCMethod] = {}
 

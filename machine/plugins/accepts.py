@@ -9,7 +9,8 @@ class accepts(Plugin):
 
     CONTENT_TYPES_MAP = {
         "html": ["text/html", "application/xhtml+xml"],
-        "json": ["application/json"]
+        "json": ["application/json"],
+        "all": ["*/*"]
     }
 
     def __init__(self, *accepted: str):
@@ -19,6 +20,9 @@ class accepts(Plugin):
             self.__accepted.extend(self.CONTENT_TYPES_MAP.get(content_type, [content_type.encode('utf-8')]))
 
     async def __call__(self, conn: Connection, params: dict) -> PluginResult:
+        if "*/*" in conn.accept:
+            return conn, params
+
         if not all(accepted in conn.accept for accepted in self.__accepted):
             raise UnsupportedResponseTypeError()
 

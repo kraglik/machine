@@ -1,4 +1,5 @@
 from functools import partial
+from typing import Union
 
 from machine.connection import Connection
 from machine.exceptions.resource import MethodNotAllowedResourceError
@@ -10,7 +11,7 @@ from machine.request import Request
 
 
 class RESTResource(Resource):
-    def __init__(self, name: str, path: Path):
+    def __init__(self, name: str, path: Union[str, Path]):
         super().__init__(name, path)
         self._method_table = {
             'GET': partial(self.get),

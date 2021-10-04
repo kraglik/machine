@@ -1,6 +1,3 @@
-import functools
-import uuid
-
 import pytest
 
 from machine import Machine, start, end, slug, Request, Response
@@ -51,6 +48,9 @@ def test_router(client):
     response = client.post("/api/v1/echo", json={'hello': 'world'})
     assert response.status_code == 200
     assert response.json() == {'hello': 'world'}
+
+    response = client.get("/api/v1/echo", json={'hello': 'world'})
+    assert response.status_code == 405
 
     response = client.get("/api/v1/echo")
     assert response.status_code == 405
