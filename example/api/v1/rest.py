@@ -1,41 +1,43 @@
-from example.infrastructure.db.database import Database
+from example.infrastructure.db.database import Todos
 from machine import Request
 from machine.resources import RESTResource
 
-from example.api.scopes import api_v1
+from example.api.scopes import api
 from machine.response import Response
 
 
-@api_v1.resource(name='hello', path='/hello/{name}$')
-class HelloResource(RESTResource):
-    async def get(self, request: Request, name: str, db: Database) -> Response:
-        return Response.html(
-            status_code=200,
-            body=f"""
-            <h1>Hello, {name}</h1></br>
-            <div>Items in database:</div></br>
-            <div>{str(db.items)}</div>
-            """
+@api.resource(name='hello', path='/todo$')
+class TodoResource(RESTResource):
+    async def get(self, request: Request, db: Todos) -> Response:
+        return Response.json(
+            {
+                "todos": db.all
+            },
+            status_code=200
         )
 
+    async def post(self, request: Request, db: Todos) -> Response:
+        todo = await request.text()
 
-@api_v1.resource(name='echo', path='/echo$')
-class EchoResource(RESTResource):
-    async def post(self, request: Request, db: Database) -> Response:
-        return Response(
-            content_type=request.content_type,
-            status_code=200,
-            body=await request.body()
+        db.add(todo)
+
+        return Response.json(
+            {
+                "todo": todo,
+                "status": "added"
+            },
+            status_code=200
         )
 
+    async def delete(self, request: Request, db: Todos) -> Response:
+        todo = await request.text()
 
-@api_v1.resource(name='query', path='/query_params$')
-class QueryParamsResource(RESTResource):
-    async def get(self, request: Request, db: Database) -> Response:
-        return Response.html(
-            status_code=200,
-            body=f"""
-                <h1>Query params:</h1></br>
-                <div>{str(request.query_params)}</div>
-            """
+        db.remove(todo)
+
+        return Response.json(
+            {
+                "todo": todo,
+                "status": "deleted"
+            },
+            status_code=200
         )

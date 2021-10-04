@@ -1,27 +1,26 @@
+import logging
+
 from machine import Machine
 
-from example.api.scopes import api, api_v1, api_v2
-from example.api.docs.v1_docs import APIV1Docs
-from example.api.docs.v2_docs import APIV2Docs
-from example.api.v1.rest import HelloResource
-from example.api.v2.rest import SimpleHelloResource
+from example.api.scopes import api
+from example.api.v1.rest import TodoResource
+
+logger = logging.getLogger(__name__)
 
 
 app = Machine()
 
 app.add_scope(api)
-app.add_scope(api_v1)
-app.add_scope(api_v2)
 
 
 @app.on_startup
 async def say_hi(_):
-    print('Hi!')
+    logger.info('App is starting/restarting...')
 
 
 @app.on_shutdown
 async def say_bye(_):
-    print('Bye!')
+    logger.info('App is shutting down...')
 
 
 if __name__ == '__main__':

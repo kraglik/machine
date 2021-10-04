@@ -18,25 +18,11 @@ class ErrorRenderer(ABC):
 
 class DefaultErrorRenderer(ErrorRenderer):
 
-    NOT_FOUND_404 = """
-    <div><h1>404 NOT FOUND: {message}</h1></div>
-    """
-
-    INTERNAL_ERROR_500 = """
-    <div><h1>500 INTERNAL SERVER ERROR</h1></div>
-    """
-
-    METHOD_NOT_ALLOWED_405 = """
-    <div><h1>405 METHOD NOT ALLOWED: {message}</h1></div>
-    """
-
-    BAD_REQUEST_400 = """
-    <div><h1>400 BAD REQUEST: {message}</h1></div>
-    """
-
-    FORBIDDEN_403 = """
-    <div><h1>403 FORBIDDEN: {message}</h1></div>
-    """
+    NOT_FOUND_404 = "404 Not Found"
+    INTERNAL_ERROR_500 = "500 Internal Server Error"
+    METHOD_NOT_ALLOWED_405 = "405 Method Not Allowed"
+    BAD_REQUEST_400 = "400 Bad Request"
+    FORBIDDEN_403 = "403 Forbidden"
 
     def __init__(self):
         self.__errors = {
@@ -59,11 +45,8 @@ class DefaultErrorRenderer(ErrorRenderer):
 
         status_code = status_code or error.status_code
 
-        message = error if isinstance(error, str) else \
-            (error.message if isinstance(error, MachineError) else 'Unexpected error')
-
-        await conn.send_html(
-            body=self.__errors[status_code].format(message=message),
+        await conn.send_text(
+            body=self.__errors[status_code],
             status_code=status_code,
             headers=[]
         )
