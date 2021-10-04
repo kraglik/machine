@@ -12,3 +12,5 @@ class Plugin(ABC):
     async def __call__(self, conn: Connection, params: dict) -> PluginResult:
         raise NotImplementedError
 
+    async def destruct(self, conn: Connection, params: dict) -> PluginResult:
+        return conn, params

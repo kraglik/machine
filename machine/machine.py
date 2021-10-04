@@ -1,22 +1,13 @@
 import logging
+from typing import Optional
+
 import uvicorn
 
-from yarl import URL
-
-from .error_pages import NOT_FOUND_404, INTERNAL_ERROR_500, METHOD_NOT_ALLOWED_405, BAD_REQUEST_400
+from .error_renderer import ErrorRenderer, DefaultErrorRenderer
 from .exceptions.machine import MachineError
 from .scope import Scope
 from .path import Path
 from .connection import Connection
-
-
-ERROR_PAGES = {
-    404: NOT_FOUND_404,
-    500: INTERNAL_ERROR_500,
-    400: BAD_REQUEST_400,
-    405: METHOD_NOT_ALLOWED_405
-
-}
 
 
 logger = logging.getLogger('machine')
@@ -24,9 +15,9 @@ logger = logging.getLogger('machine')
 
 class Machine:
 
-    def __init__(self, error_pages: dict = ERROR_PAGES):
+    def __init__(self, error_renderer: Optional[ErrorRenderer] = None):
         self.__scopes = []
-        self.__error_pages = error_pages
+        self.__error_renderer = error_renderer or DefaultErrorRenderer()
 
     def scope(self, path: Path) -> Scope:
         scope = Scope(path)
@@ -54,18 +45,14 @@ class Machine:
                     break
 
             if not found:
-                await conn.send_html_head(status_code=404, headers=[])
-                await conn.send_body(self.__error_pages[404])
+                await self.__error_renderer.render(conn=conn, status_code=404, error='Resource not found')
 
         except MachineError as e:
-            logger.error(f'Got exception while handling request: {e}', exc_info=e)
-            await conn.send_html_head(status_code=e.status_code, headers=[])
-            await conn.send_body(self.__error_pages[e.status_code])
+            await self.__error_renderer.render(conn, error=e)
 
         except Exception as e:
             logger.error(f'Got exception while handling request: {e}', exc_info=e)
-            await conn.send_html_head(status_code=500, headers=[])
-            await conn.send_body(self.__error_pages[500])
+            await self.__error_renderer.render(conn=conn, status_code=500, error=e)
 
         if not conn.closed:
             await conn.close()

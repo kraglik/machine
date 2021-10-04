@@ -13,7 +13,7 @@ class Pipeline(Plugin):
             if conn is None:
                 break
 
-            conn, params = plugin(conn, params)
+            conn, params = await plugin(conn, params)
 
         return conn, params
 

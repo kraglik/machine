@@ -5,6 +5,7 @@ from machine.path import Path
 from machine.pipeline import Pipeline
 from machine.plugin import Plugin, PluginResult
 from machine.resource import Resource
+from machine.utils import Either, Left, Right
 
 
 class Scope(Plugin):
@@ -34,51 +35,83 @@ class Scope(Plugin):
             self._resources.append(r(name, path))
         return wrapper
 
+    def pipeline(self, plugins: List[Plugin] = []) -> Pipeline:
+        pipeline = Pipeline(plugins=plugins.copy())
+
+        self._pipelines.append(pipeline)
+
+        return pipeline
+
     def add_resource(self, r):
         self._resources.append(r)
         return r
 
     async def __call__(self, conn: Connection, params: dict) -> PluginResult:
-        conn, params = await self._iterate_pipelines(conn, params)
+        pipelines_result = await self._iterate_pipelines(conn, params)
+        conn, params, pipelines = pipelines_result.value
 
-        if conn is None:
-            return None, {}
+        if pipelines_result.is_left():
+            return await self._destruct_plugins(conn, params, pipelines)
 
-        new_conn, new_params = await self._iterate_resources(conn, params)
+        resources_result = await self._iterate_resources(conn, params)
+        conn, params, resources = resources_result.value
 
-        if new_conn is not None:
-            return new_conn, new_params
+        if resources_result.is_right():
+            return await self._destruct_plugins(conn, params, resources + pipelines)
 
-        return await self._iterate_scopes(conn, params)
+        scopes_result = await self._iterate_scopes(conn, params)
+        conn, params, scopes = scopes_result.value
 
-    async def _iterate_pipelines(self, conn: Connection, params: dict) -> PluginResult:
+        return await self._destruct_plugins(conn, params, scopes + resources + pipelines)
+
+    async def _destruct_plugins(self, conn: Connection, params: dict, plugins: List[Plugin]) -> PluginResult:
+        for plugin in plugins:
+            conn, params = await plugin.destruct(conn, params)
+
+        return conn, params
+
+    async def _iterate_pipelines(self, conn: Connection, params: dict) -> Either:
+        applied_plugins = []
+
         path = params['path']
         path_result = self._path.parse(path)
 
         if path_result.is_left():
-            return None, {}
+            return Left((conn, params, []))
 
         new_variables, path = path_result.value
         params = {**params, **new_variables, 'path': path}
 
         for pipeline in self._pipelines:
+            conn, params = await pipeline(conn, params)
             if conn is None:
                 break
 
-            conn, params = await pipeline(conn, params)
+            applied_plugins.insert(0, pipeline)
 
-        return conn, params
+        return Right((conn, params, applied_plugins))
 
-    async def _iterate_scopes(self, conn: Connection, params: dict) -> PluginResult:
+    async def _iterate_scopes(self, conn: Connection, params: dict) -> Either:
+        applied_scopes = []
+
         if not self._scopes:
-            return conn, params
+            return Left((conn, params, applied_scopes))
+
+        new_conn, new_params = None, {}
 
         for scope in self._scopes:
-            return await scope(conn, params)
+            new_conn, new_params = await scope(conn, params)
 
-        return None, {}
+            if new_conn is not None:
+                applied_scopes.append(scope)
+                break
 
-    async def _iterate_resources(self, conn: Connection, params: dict) -> PluginResult:
+        if new_conn is None:
+            return Left((conn, params, applied_scopes))
+
+        return Right((new_conn, new_params, applied_scopes))
+
+    async def _iterate_resources(self, conn: Connection, params: dict) -> Either:
         path = params['path']
 
         for resource in self._resources:
@@ -92,6 +125,9 @@ class Scope(Plugin):
             if 'path' in resource_params:
                 del resource_params['path']
 
-            return await resource(conn, resource_params)
+            new_conn, new_params = await resource(conn, resource_params)
 
-        return None, {}
+            if new_conn is not None:
+                return Right((new_conn, new_params, [resource]))
+
+        return Left((conn, params, []))

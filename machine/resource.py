@@ -1,8 +1,7 @@
-from abc import ABC, abstractmethod
+from abc import ABC
 
-from machine.connection import Connection
 from machine.path import Path
-from machine.plugin import Plugin, PluginResult
+from machine.plugin import Plugin
 
 
 class Resource(Plugin, ABC):
