@@ -1,9 +1,8 @@
 from machine import Machine
-from machine import start, end, slug, const
 
 from example.api.scopes import api, api_v1, api_v2
-from example.api.docs.v1_docs import r as v1_docs_resource
-from example.api.docs.v2_docs import r as v2_docs_resource
+from example.api.docs.v1_docs import APIV1Docs
+from example.api.docs.v2_docs import APIV2Docs
 from example.api.v1.rest import HelloResource
 from example.api.v2.rest import SimpleHelloResource
 

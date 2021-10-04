@@ -1,13 +1,17 @@
-from machine.resources import JsonRPCResource
-from machine import start, slug
+from machine.resources import RESTResource
+from machine import start, Request, Response
 
 from example.api.scopes import api
 
 
-r = api.add_resource(JsonRPCResource(name='docs_v1', path=start/'docs'/'v2'))
-
-
-@r.method
-async def add(a: int, b: int):
-    return a + b
+@api.resource(name='docs_v2', path=start/'docs'/'v2')
+class APIV2Docs(RESTResource):
+    async def get(self, request: Request) -> Response:
+        return Response.html(
+            body="""
+                <h1>Docs for API v.2</h1>
+                <h3>DOCS</h3>
+            """,
+            status_code=200
+        )
 

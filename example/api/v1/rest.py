@@ -10,7 +10,6 @@ from machine.response import Response
 @api_v1.resource(name='hello', path=start/'hello'/slug('name') + end)
 class HelloResource(RESTResource):
     async def get(self, request: Request, name: str, db: Database) -> Response:
-        print(name)
         return Response.html(
             status_code=200,
             body=f"""
@@ -28,4 +27,16 @@ class EchoResource(RESTResource):
             content_type=request.content_type,
             status_code=200,
             body=await request.body()
+        )
+
+
+@api_v1.resource(name='query', path=start/'query_params' + end)
+class QueryParamsResource(RESTResource):
+    async def get(self, request: Request, db: Database) -> Response:
+        return Response.html(
+            status_code=200,
+            body=f"""
+                <h1>Query params:</h1></br>
+                <div>{str(request.query_params)}</div>
+            """
         )

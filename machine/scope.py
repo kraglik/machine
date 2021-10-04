@@ -1,4 +1,4 @@
-from typing import List, Optional, Tuple, Callable
+from typing import List
 
 from machine.connection import Connection
 from machine.path import Path

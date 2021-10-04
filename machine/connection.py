@@ -14,15 +14,14 @@ END_EVENT = {
 
 class Connection:
     def __init__(self, scope, send, receive):
-        url = URL(scope.get('path', ''))
-
         self.__scope = scope
         self.__send = send
         self.__receive = receive
         self.__body = b''
         self.__has_next_chunk = True
-        self.__url = url.human_repr()
-        self.__path = url.path
+        self.__path = scope.get('path', '')
+        query_params = scope.get('query_string', b'').decode('utf-8')
+        self.__url = self.__path + ('?' + query_params) if query_params else ''
         self.__method = HTTPMethod(scope.get('method', 'UNKNOWN'))
         self.__host = scope.get('server', ('', 0))
         self.__client = scope.get('server', ('', 0))
@@ -46,8 +45,10 @@ class Connection:
             ]
         }
         self.__response_cookies = {}
-        self.__query_params = {k: v for k, v in url.query.items()}
+        self.__query_params = {k: v for k, v in URL(self.__url).query.items()}
         self.__head_sent = False
+
+        print(self.__url)
 
     def __check_if_closed(self):
         if self.__closed:
