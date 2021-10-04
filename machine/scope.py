@@ -51,7 +51,8 @@ class Scope(Plugin):
         conn, params, pipelines = pipelines_result.value
 
         if pipelines_result.is_left():
-            return await self._destruct_plugins(conn, params, pipelines)
+            await self._destruct_plugins(conn, params, pipelines)
+            return None, {}
 
         resources_result = await self._iterate_resources(conn, params)
         conn, params, resources = resources_result.value
@@ -62,7 +63,9 @@ class Scope(Plugin):
         scopes_result = await self._iterate_scopes(conn, params)
         conn, params, scopes = scopes_result.value
 
-        return await self._destruct_plugins(conn, params, scopes + resources + pipelines)
+        new_conn, new_params = await self._destruct_plugins(conn, params, scopes + resources + pipelines)
+
+        return (new_conn, new_params) if scopes_result.is_right() else (None, {})
 
     async def _destruct_plugins(self, conn: Connection, params: dict, plugins: List[Plugin]) -> PluginResult:
         for plugin in plugins:
@@ -115,7 +118,6 @@ class Scope(Plugin):
         path = params['path']
 
         for resource in self._resources:
-
             path_result = resource.path.parse(path)
 
             if path_result.is_left():

@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from typing import Optional
 
@@ -18,21 +19,64 @@ class Machine:
     def __init__(self, error_renderer: Optional[ErrorRenderer] = None):
         self.__scopes = []
         self.__error_renderer = error_renderer or DefaultErrorRenderer()
+        self.__on_startup = []
+        self.__on_shutdown = []
 
     def scope(self, path: Path) -> Scope:
         scope = Scope(path)
         self.__scopes.append(scope)
         return scope
 
+    @property
+    def on_startup(self):
+        def wrapper(f):
+            self.__on_startup.append(f)
+            return f
+
+        return wrapper
+
+    @property
+    def on_shutdown(self):
+        def wrapper(f):
+            self.__on_shutdown.append(f)
+            return f
+
+        return wrapper
+
     def add_scope(self, scope: Scope) -> Scope:
         self.__scopes.append(scope)
         return scope
+
+    async def __startup(self):
+        coros = [f(self) for f in self.__on_startup]
+        coros = [coro for coro in coros if asyncio.iscoroutine(coro)]
+
+        await asyncio.gather(*coros)
+
+    async def __shutdown(self):
+        coros = [f(self) for f in self.__on_shutdown]
+        coros = [coro for coro in coros if asyncio.iscoroutine(coro)]
+
+        await asyncio.gather(*coros)
+
+    async def __lifespan(self, scope, receive, send):
+        message = await receive()
+        assert message["type"] in ["lifespan.startup", "lifespan.shutdown"]
+
+        if message["type"] == "lifespan.startup":
+            await self.__startup()
+
+            await send({"type": "lifespan.startup.complete"})
+        else:
+            await self.__shutdown()
+
+            await send({"type": "lifespan.shutdown.complete"})
 
     async def __call__(self, conn_scope, receive, send):
         conn = Connection(scope=conn_scope, send=send, receive=receive)
 
         if conn.type == 'lifespan':
-            return
+            return await self.__lifespan(conn_scope, receive, send)
 
         try:
             found = False

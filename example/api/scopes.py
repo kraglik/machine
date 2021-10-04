@@ -1,11 +1,12 @@
 from machine import Scope, start
 from machine.plugins import content_type, resource
 
+from example.api.pipelines import api_pipeline
 from example.infrastructure.db.session import session_constructor, session_destructor
 
 api = Scope(start/'api')
 api.pipeline([
-    content_type('application/json')
+    api_pipeline  # Plugin api allows pipelines to be included in other pipelines
 ])
 
 api_v1 = api.scope(start/'v1')

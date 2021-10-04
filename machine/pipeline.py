@@ -17,6 +17,12 @@ class Pipeline(Plugin):
 
         return conn, params
 
+    async def destruct(self, conn: Connection, params: dict) -> PluginResult:
+        for plugin in reversed(self.__plugins):
+            conn, params = await plugin.destruct(conn, params)
+
+        return conn, params
+
     def add(self, plugin: Plugin) -> 'Pipeline':
         self.__plugins.append(plugin)
         return self
