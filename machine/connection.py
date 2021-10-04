@@ -14,16 +14,18 @@ END_EVENT = {
 
 class Connection:
     def __init__(self, scope, send, receive):
+        url = URL(scope.get('path', ''))
+
         self.__scope = scope
         self.__send = send
         self.__receive = receive
         self.__body = b''
         self.__has_next_chunk = True
-        self.__url = URL(scope.get('path', ''))
-        self.__path = self.__url.path
+        self.__url = url.human_repr()
+        self.__path = url.path
         self.__method = HTTPMethod(scope.get('method', 'UNKNOWN'))
-        self.__host = ''.join([str(x) for x in scope.get('server', [])])
-        self.__client = ''.join([str(x) for x in scope.get('client', [])])
+        self.__host = scope.get('server', ('', 0))
+        self.__client = scope.get('server', ('', 0))
         self.__http_version = scope.get('http_version')
         self.__type = scope.get('type')
         self.__scheme = scope.get('scheme')
@@ -36,12 +38,15 @@ class Connection:
         }
         self.__response_headers = {}
         self.__request_cookies = {
-            cookie[0]: cookie[1]
-            for header, cookie in scope.get('headers', [])
-            if header == b'cookie'
+            cookie: value
+            for cookie, value in [
+                cookie.split(b'=')
+                for cookie in
+                [cookie for header, cookie in scope.get('headers', []) if header == b'cookie']
+            ]
         }
         self.__response_cookies = {}
-        self.__query_params = {k: v for k, v in self.__url.query.items()}
+        self.__query_params = {k: v for k, v in url.query.items()}
         self.__head_sent = False
 
     def __check_if_closed(self):
@@ -84,8 +89,16 @@ class Connection:
             return await self.__read_next_chunk()
 
     @property
+    def has_next_chunk(self) -> bool:
+        return self.__has_next_chunk
+
+    @property
     def type(self) -> str:
         return self.__type
+
+    @property
+    def url(self) -> str:
+        return self.__url
 
     @property
     def path(self) -> str:
@@ -94,6 +107,26 @@ class Connection:
     @property
     def method(self) -> HTTPMethod:
         return self.__method
+
+    @property
+    def server_host(self) -> str:
+        return self.__host[0]
+
+    @property
+    def server_port(self) -> int:
+        return self.__host[1]
+
+    @property
+    def client_host(self) -> str:
+        return self.__client[0]
+
+    @property
+    def client_port(self) -> int:
+        return self.__client[1]
+
+    @property
+    def http_version(self) -> str:
+        return self.__http_version
 
     @property
     def cookies(self) -> Dict[str, bytes]:
@@ -107,7 +140,10 @@ class Connection:
     def response_cookies(self) -> Dict[str, bytes]:
         return self.__response_cookies
 
-    def put_cookie(self, name: str, value: bytes):
+    def put_cookie(self, name: str, value: Union[str, bytes], encoding: str = 'utf-8'):
+        if not isinstance(value, bytes):
+            value = value.encode(encoding=encoding)
+
         self.__response_cookies[name] = value
 
     def remove_cookie(self, name: str):
@@ -126,7 +162,10 @@ class Connection:
     def response_headers(self) -> Dict[str, bytes]:
         return self.__response_headers
 
-    def put_header(self, name: str, value: bytes):
+    def put_header(self, name: str, value: Union[str, bytes], encoding: str = 'utf-8'):
+        if not isinstance(value, bytes):
+            value = value.encode(encoding=encoding)
+
         self.__response_headers[name] = value
 
     @property

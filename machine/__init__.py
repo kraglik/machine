@@ -6,10 +6,14 @@ from .pipeline import Pipeline
 from .resource import Resource
 from .path import Path, Directory, regex, named, const
 from .path import start, end, dash, slash, ground, integral, named_regex, slug
+from .request import Request
+from .response import Response
 
 __all__ = [
     'Machine',
     'Connection',
+    'Request',
+    'Response',
     'Plugin',
     'PluginResult',
     'Scope',

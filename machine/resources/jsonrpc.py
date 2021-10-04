@@ -35,12 +35,15 @@ class JsonRPCResource(Resource):
         status_code = 200
         error_message = None
         result = ''
+        request_id = None
+        method_name = None
+        method_params = None
 
         try:
-            request_id, method_name, params = await self._parse_request(conn)
+            request_id, method_name, method_params = await self._parse_request(conn)
             method = self._get_method(method_name)
 
-            result = await self._execute_method(method, conn, params)
+            result = await self._execute_method(method, params, method_params)
 
         except (BadJsonRPCRequestError, WrongJsonRPCParamsError):
             raise BadRequestResourceError()
@@ -53,31 +56,53 @@ class JsonRPCResource(Resource):
             error_message = e.message
         
         if error_message:
-            await self._send_jsonrpc_error(conn, request_id, error_message, method_name, status_code)
+            await self._send_jsonrpc_response(
+                conn=conn,
+                request_id=request_id,
+                method=method_name,
+                error=error_message,
+                status_code=status_code
+            )
         else:
             if isinstance(result, Response):
+                assert result.content_type == 'application/json', \
+                    "Only json responses are supported in JsonRPCResource"
+
                 status_code = result.status_code
                 result = result.body
             elif isinstance(result, (dict, float, int, str, bool, list)):
                 status_code = 200
 
-            await self._send_jsonrpc_response(conn, request_id, method_name, result)
+            await self._send_jsonrpc_response(
+                conn=conn,
+                request_id=request_id,
+                method=method_name,
+                result=result,
+                status_code=status_code
+            )
 
         return conn, params
-    
-    async def _send_jsonrpc_error(self, conn: Connection, request_id: str, reason: str, method: str, status_code: int):
-        return await conn.send_json(
-            body=json.dumps({
-                "jsonrpc": "2.0",
-                "id": request_id,
-                "method": method,
-                "error": reason
-            }),
-            status_code=status_code,
-            headers=[]
-        )
 
-    async def _send_jsonrpc_response(self, conn: Connection, request_id: str, method: str, result):
+    async def _send_jsonrpc_response(
+            self,
+            conn: Connection,
+            request_id: str,
+            method: str,
+            status_code: int,
+            result: any = None,
+            error: any = None
+    ):
+        response = {
+            "jsonrpc": "2.0",
+            "id": request_id,
+            "method": method,
+        }
+
+        if error is not None:
+            response.update({"error": error})
+        else:
+            response.update({"result": result})
+
         return await conn.send_json(
             body=json.dumps({
                 "jsonrpc": "2.0",
@@ -85,7 +110,7 @@ class JsonRPCResource(Resource):
                 "method": method,
                 "result": result
             }),
-            status_code=200,
+            status_code=status_code,
             headers=[]
         )
 
@@ -111,8 +136,8 @@ class JsonRPCResource(Resource):
 
         return self._methods[method_name].function
 
-    async def _execute_method(self, method, connection, params):
-        if isinstance(params, dict):
-            return await method(connection, **params)
-        elif isinstance(params, (list, int, float, str, bool)):
-            return await method(connection, params)
+    async def _execute_method(self, method, params, method_params):
+        if isinstance(method_params, dict):
+            return await method(**{**params, **method_params})
+        elif isinstance(method_params, (list, int, float, str, bool)):
+            return await method(params, **params)

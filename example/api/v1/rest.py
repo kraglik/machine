@@ -1,33 +1,26 @@
+from machine import Request
 from machine.resources import RESTResource
-from machine import start, slug, end, Connection
+from machine import start, slug, end
 
 from example.api.scopes import api_v1
-from machine.response import html_response
+from machine.response import Response
 
 
 @api_v1.resource(name='hello', path=start/'hello'/slug('name') + end)
 class HelloResource(RESTResource):
-    async def get(self, conn: Connection, params: dict):
-
-        conn.put_cookie('some_token', b'blahblah')
-        conn.put_header('Authorization', b'Bearer something')
-
-        return html_response(
+    async def get(self, request: Request, name: str) -> Response:
+        print(name)
+        return Response.html(
             status_code=200,
-            body=f"<h1>Hello, {params['name']}</h1>"
+            body=f"<h1>Hello, {name}</h1>"
         )
 
 
 @api_v1.resource(name='echo', path=start/'echo' + end)
 class EchoResource(RESTResource):
-    async def post(self, conn: Connection, params: dict):
-        body = await conn.body()
-
-        content_type = conn.headers['content-type']
-
-        await conn.send_head(
-            content_type=content_type.decode('utf-8'),
+    async def post(self, request: Request) -> Response:
+        return Response(
+            content_type=request.content_type,
             status_code=200,
-            headers=[]
+            body=await request.body()
         )
-        await conn.send_body(body)

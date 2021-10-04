@@ -1,4 +1,4 @@
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Callable
 
 from machine.connection import Connection
 from machine.path import Path
@@ -82,6 +82,7 @@ class Scope(Plugin):
         path = params['path']
 
         for resource in self._resources:
+
             path_result = resource.path.parse(path)
 
             if path_result.is_left():
