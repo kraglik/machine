@@ -1,10 +1,10 @@
 import pytest
 
-from machine import Machine, start
+from machine import Machine
 
 app = Machine()
 
-api = app.scope(start/'api')
+api = app.scope('/api')
 
 
 class StateTracker:

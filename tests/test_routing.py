@@ -1,17 +1,17 @@
 import pytest
 
-from machine import Machine, start, end, slug, Request, Response
+from machine import Machine, Request, Response
 from machine.resources import RESTResource, JsonRPCResource
 
 app = Machine()
 
-api = app.scope(start/'api')
+api = app.scope('/api')
 
-v1 = api.scope(start/'v1')
-v2 = api.scope(start/'v2')
+v1 = api.scope('/v1')
+v2 = api.scope('/v2')
 
 
-@v1.resource('echo', start/'echo' + end)
+@v1.resource('echo', '/echo')
 class EchoResourceV1(RESTResource):
     async def post(self, request: Request):
         return Response(
@@ -21,13 +21,13 @@ class EchoResourceV1(RESTResource):
         )
 
 
-@v1.resource('name', start/'name'/slug('name') + end)
+@v1.resource('name', '/name/{name}$')
 class NameResourceV1(RESTResource):
     async def get(self, request: Request, name: str) -> Response:
         return Response.text(name, status_code=200)
 
 
-rpc = v2.add_resource(JsonRPCResource('json_rpc', start/'public'/'jsonrpc'))
+rpc = v2.add_resource(JsonRPCResource('json_rpc', '/public/jsonrpc'))
 
 
 @rpc.method

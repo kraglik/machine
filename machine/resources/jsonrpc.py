@@ -140,4 +140,4 @@ class JsonRPCResource(Resource):
         if isinstance(method_params, dict):
             return await method(**{**params, **method_params})
         elif isinstance(method_params, (list, int, float, str, bool)):
-            return await method(params, **params)
+            return await method(method_params, **params)

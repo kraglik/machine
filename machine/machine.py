@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from typing import Optional
+from typing import Optional, Union
 
 import uvicorn
 
@@ -21,7 +21,7 @@ class Machine:
         self.__on_startup = []
         self.__on_shutdown = []
 
-    def scope(self, path: Path) -> Scope:
+    def scope(self, path: Union[str, Path]) -> Scope:
         scope = Scope(path)
         self.__scopes.append(scope)
         return scope
