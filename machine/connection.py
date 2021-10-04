@@ -48,8 +48,6 @@ class Connection:
         self.__query_params = {k: v for k, v in URL(self.__url).query.items()}
         self.__head_sent = False
 
-        print(self.__url)
-
     def __check_if_closed(self):
         if self.__closed:
             raise ConnectionClosed()
