@@ -28,9 +28,17 @@ class RESTResource(Resource):
             result = await method(request=Request.from_conn(conn), **params)
 
             if isinstance(result, str):
-                await conn.send_text(body=result, status_code=200, headers=[])
+                await conn.send_text(
+                    body=result,
+                    status_code=200,
+                    headers=[('connection', b'close')]
+                )
             elif isinstance(result, Response):
-                await conn.send_head(content_type=result.content_type, status_code=result.status_code)
+                await conn.send_head(
+                    content_type=result.content_type,
+                    status_code=result.status_code,
+                    headers=[('connection', b'close')]
+                )
                 await conn.send_body(body=result.bytes())
 
         return conn, params

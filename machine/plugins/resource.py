@@ -6,7 +6,6 @@ from machine.plugin import Plugin, PluginResult
 
 
 class resource(Plugin):
-
     def __init__(
             self,
             name: str,

@@ -47,6 +47,10 @@ class Connection:
         self.__response_cookies = {}
         self.__query_params = {k: v for k, v in URL(self.__url).query.items()}
         self.__head_sent = False
+        self.__accept = [
+            accept.decode('utf-8')
+            for accept in self.__request_headers.get('accept', b'').split(b',')
+        ]
 
     def __check_if_closed(self):
         if self.__closed:
@@ -90,6 +94,10 @@ class Connection:
     @property
     def has_next_chunk(self) -> bool:
         return self.__has_next_chunk
+
+    @property
+    def accept(self) -> List[str]:
+        return self.__accept
 
     @property
     def type(self) -> str:
@@ -245,16 +253,22 @@ class Connection:
     async def send_chunk(self, chunk: bytes, is_end: bool = False, event_type=SendEventType.HTTP_RESPONSE_BODY):
         await self.__send_chunk(chunk=chunk, event_type=event_type, is_end=is_end)
 
-    async def send_json(
+    async def send_content(
             self,
-            body: str,
+            body: Union[str, bytes],
             status_code: int,
             headers: List[Tuple[str, bytes]],
+            content_type: Union[str, bytes],
             encoding: str = 'utf-8',
             chunk_size_bytes: int = 512
     ):
         if not any(header == 'content-type' for header, _ in headers):
-            headers.append(('content-type', b'application/json'))
+            headers.append((
+                'content-type',
+                (content_type
+                 if isinstance(content_type, bytes)
+                 else content_type.encode(encoding)))
+            )
 
         await self._send({
             'type': SendEventType.HTTP_RESPONSE_START,
@@ -262,7 +276,7 @@ class Connection:
             'headers': [
                 [header.encode('utf-8'), value]
                 for header, value in headers
-            ]
+            ] + [[b'connection', b'close']]
         })
 
         self.__head_sent = True
@@ -277,18 +291,48 @@ class Connection:
             encoding: str = 'utf-8',
             chunk_size_bytes: int = 512
     ):
-        if not any(header == 'content-type' for header, _ in headers):
-            headers.append(('content-type', b'text/plain'))
+        await self.send_content(
+            body=body,
+            status_code=status_code,
+            headers=headers,
+            encoding=encoding,
+            chunk_size_bytes=chunk_size_bytes,
+            content_type='text/plain'
+        )
 
-        await self._send({
-            'type': SendEventType.HTTP_RESPONSE_START,
-            'status': status_code,
-            'headers': [
-                [header.encode('utf-8'), value]
-                for header, value in headers
-            ]
-        })
+    async def send_html(
+            self,
+            body: str,
+            status_code: int,
+            headers: List[Tuple[str, bytes]],
+            encoding: str = 'utf-8',
+            chunk_size_bytes: int = 512
+    ):
+        await self.send_content(
+            body=body,
+            status_code=status_code,
+            headers=headers,
+            encoding=encoding,
+            chunk_size_bytes=chunk_size_bytes,
+            content_type='text/html'
+        )
 
-        self.__head_sent = True
+    async def send_json(
+            self,
+            body: Union[bytes, str, object],
+            status_code: int,
+            headers: List[Tuple[str, bytes]],
+            encoding: str = 'utf-8',
+            chunk_size_bytes: int = 512
+    ):
+        body = body if isinstance(body, bytes) \
+            else (body if isinstance(body, str) else json.dumps(body)).encode(encoding=encoding)
 
-        await self.send_body(body, encoding, chunk_size_bytes)
+        await self.send_content(
+            body=body,
+            status_code=status_code,
+            headers=headers,
+            encoding=encoding,
+            chunk_size_bytes=chunk_size_bytes,
+            content_type='application/json'
+        )

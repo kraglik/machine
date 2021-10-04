@@ -4,7 +4,6 @@ from machine.plugin import Plugin, PluginResult
 
 
 class content_type(Plugin):
-
     def __init__(self, ct: str):
         self.__content_type = ct
 

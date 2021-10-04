@@ -53,6 +53,6 @@ class Request:
             host=(conn.server_host, conn.server_port),
             client=(conn.client_host, conn.client_port),
             http_version=conn.http_version,
-            content_type=conn.request_headers.get('content-type', 'unknown').decode('utf-8'),
+            content_type=conn.request_headers.get('content-type', b'text/plain').decode('utf-8'),
             query_params=conn.query_params
         )

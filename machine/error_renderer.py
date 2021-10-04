@@ -62,5 +62,8 @@ class DefaultErrorRenderer(ErrorRenderer):
         message = error if isinstance(error, str) else \
             (error.message if isinstance(error, MachineError) else 'Unexpected error')
 
-        await conn.send_html_head(status_code=status_code, headers=[])
-        await conn.send_body(self.__errors[status_code].format(message=message))
+        await conn.send_html(
+            body=self.__errors[status_code].format(message=message),
+            status_code=status_code,
+            headers=[]
+        )
