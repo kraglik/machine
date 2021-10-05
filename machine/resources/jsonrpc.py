@@ -104,12 +104,7 @@ class JsonRPCResource(Resource):
             response.update({"result": result})
 
         return await conn.send_json(
-            body=json.dumps({
-                "jsonrpc": "2.0",
-                "id": request_id,
-                "method": method,
-                "result": result
-            }),
+            body=json.dumps(response),
             status_code=status_code,
             headers={'connection': 'close'},
             cookies={}
@@ -142,3 +137,5 @@ class JsonRPCResource(Resource):
             return await method(**{**params, **method_params})
         elif isinstance(method_params, (list, int, float, str, bool)):
             return await method(method_params, **params)
+        elif method_params is None:
+            return await method(**params)

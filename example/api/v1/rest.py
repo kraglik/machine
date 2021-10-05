@@ -6,24 +6,24 @@ from example.api.scopes import api
 from machine.response import Response, JSONResponse
 
 
-r = api.add_resource(HttpResource(name='hello', path='/todo$'))
+todo_r = api.add(HttpResource(name='todo_rest', path='/todo$'))
 
 
-@r.get
+@todo_r.get
 async def todo_list_get(request: Request, db: Todos) -> Response:
     return JSONResponse(
         {
-            "todos": db.all
+            "todos": await db.all()
         },
         status_code=200
     )
 
 
-@r.post
+@todo_r.post
 async def todo_create(request: Request, db: Todos) -> Response:
     todo = await request.text()
 
-    db.add(todo)
+    await db.add(todo)
 
     return JSONResponse(
         {
@@ -34,11 +34,11 @@ async def todo_create(request: Request, db: Todos) -> Response:
     )
 
 
-@r.delete
+@todo_r.delete
 async def todo_delete(request: Request, db: Todos) -> Response:
     todo = await request.text()
 
-    db.remove(todo)
+    await db.remove(todo)
 
     return JSONResponse(
         {

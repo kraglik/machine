@@ -1,4 +1,3 @@
-from functools import partial
 from typing import Union
 
 from machine.connection import Connection

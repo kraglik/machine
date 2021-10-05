@@ -1,16 +1,22 @@
+import asyncio
+
+
 class Todos:
     def __init__(self):
         self.__todos = []
 
-    def add(self, todo: str):
+    async def add(self, todo: str):
+        await asyncio.sleep(0)
         self.__todos.append(todo)
 
-    def remove(self, todo: str):
+    async def remove(self, todo: str):
+        await asyncio.sleep(0)
         self.__todos.remove(todo)
 
-    def clear(self):
+    async def clear(self):
+        await asyncio.sleep(0)
         self.__todos.clear()
 
-    @property
-    def all(self):
+    async def all(self):
+        await asyncio.sleep(0)
         return self.__todos

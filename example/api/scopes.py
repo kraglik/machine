@@ -1,4 +1,4 @@
-from machine import Scope
+from machine import Scope, Pipeline
 from machine.plugins import resource
 
 from example.infrastructure.db.session import session_constructor, session_destructor

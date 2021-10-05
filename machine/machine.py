@@ -46,6 +46,15 @@ class Machine:
         self.__scopes.append(scope)
         return scope
 
+    def add(self, other):
+        if isinstance(other, Scope):
+            self.add_scope(scope=other)
+            return other
+        raise ValueError("Unexpected argument type!")
+
+    def __iadd__(self, other):
+        return self.add(other)
+
     async def __startup(self):
         coros = [f(self) for f in self.__on_startup]
         coros = [coro for coro in coros if asyncio.iscoroutine(coro)]

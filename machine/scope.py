@@ -46,6 +46,24 @@ class Scope(Plugin):
         self._resources.append(r)
         return r
 
+    def add(self, other):
+        if isinstance(other, Scope):
+            self._scopes.append(other)
+            return other
+
+        elif isinstance(other, Resource):
+            self._resources.append(other)
+            return other
+
+        elif isinstance(other, Pipeline):
+            self._pipelines.append(other)
+            return other
+
+        raise ValueError("Unexpected argument type!")
+
+    def __iadd__(self, other):
+        return self.add(other)
+
     async def __call__(self, conn: Connection, params: dict) -> PluginResult:
         pipelines_result = await self._iterate_pipelines(conn, params)
         conn, params, pipelines = pipelines_result.value
