@@ -30,14 +30,18 @@ class RESTResource(Resource):
         return sequence([
             *prefix,
             options([
-                sequence([
-                    method(method_name),
-                    *handler.plugins,
-                    handler()
-                ])
+                sequence(
+                    [
+                        method(method_name),
+                        *handler.plugins,
+                        handler()
+                    ] if handler is not None else
+                    [
+                        method(method_name, allowed=False)
+                    ]
+                )
                 for method_name, handler
                 in self._method_table.items()
-                if handler is not None
             ])
         ])()
 
