@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Optional, Tuple
 
 from .connection import Connection
-from .utils import Either, Right
+from .utils import Either
 
 PluginResult = Tuple[Optional[Connection], dict]
 

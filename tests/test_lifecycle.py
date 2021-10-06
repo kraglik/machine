@@ -1,10 +1,11 @@
 import pytest
 
 from machine import Machine
+from machine.plugins import options
 
 app = Machine()
 
-api = app.scope('/api')
+app.add_root(options([]))
 
 
 class StateTracker:

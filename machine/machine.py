@@ -7,8 +7,6 @@ import uvicorn
 from .plugins import options
 from .error_renderer import ErrorRenderer, DefaultErrorRenderer
 from .exceptions.machine import MachineError
-from .scope import Scope
-from .path import Path
 from .connection import Connection
 from .types import PluginGenerator
 

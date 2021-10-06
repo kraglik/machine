@@ -14,10 +14,16 @@ class Sequence(Plugin):
 
     async def __call__(self, conn: Connection, params: dict) -> Either:
         result = Right((conn, params))
+        exception = None
 
         for plugin_gen in self._plugins:
             plugin = plugin_gen()
-            result = await plugin(conn, params)
+
+            try:
+                result = await plugin(conn, params)
+            except Exception as e:
+                exception = e
+                break
 
             if result.is_left():
                 break
@@ -27,6 +33,9 @@ class Sequence(Plugin):
 
         for plugin in reversed(self._applied_plugins):
             conn, params = await plugin.destruct(conn, params)
+
+        if exception is not None:
+            raise exception
 
         return result
 

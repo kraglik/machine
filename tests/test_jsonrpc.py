@@ -1,20 +1,21 @@
 import pytest
 
 from machine import Machine
-from machine.resources import JsonRPCResource
+from machine.plugins import sequence, path, JsonRPCResource
 
 app = Machine()
 
-api = app.scope('/api')
-rpc = api.add_resource(
-    JsonRPCResource(
-        'json_rpc',
-        '/public/jsonrpc'
-    )
+rpc = JsonRPCResource()
+
+app.add_root(
+    sequence([
+        path('/api/public/jsonrpc$'),
+        rpc
+    ])
 )
 
 
-@rpc.method
+@rpc.method()
 async def echo(*args, **kwargs):
     if len(args) == 1:
         return args[0]
@@ -22,7 +23,7 @@ async def echo(*args, **kwargs):
     return kwargs
 
 
-@rpc.method
+@rpc.method()
 async def add(a: int, b: int) -> int:
     return a + b
 
@@ -34,7 +35,6 @@ def client(test_client_factory):
 
 
 def test_jsonrpc(client):
-
     def jsonrpc_request(method_name: str, params) -> dict:
         return {
             "id": "1",

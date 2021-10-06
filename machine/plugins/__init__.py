@@ -4,6 +4,7 @@ from .accepts import accepts
 from .method import method
 from .path import path
 from .rest import RESTResource
+from .jsonrpc import JsonRPCResource
 from .dependency import dependency
 from .options import options
 from .sequence import sequence
@@ -18,5 +19,6 @@ __all__ = [
     'conn_type',
     'method',
     'path',
-    'RESTResource'
+    'RESTResource',
+    'JsonRPCResource'
 ]

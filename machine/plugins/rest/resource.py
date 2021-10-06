@@ -52,20 +52,20 @@ class RESTResource(Resource):
 
         return wrapper
 
-    def get(self, plugins: List[PluginGenerator]):
-        return self._method_setter('GET', plugins)
+    def get(self, plugins: List[PluginGenerator] = None):
+        return self._method_setter('GET', plugins or [])
 
-    def post(self, plugins: List[PluginGenerator]):
-        return self._method_setter('POST', plugins)
+    def post(self, plugins: List[PluginGenerator] = None):
+        return self._method_setter('POST', plugins or [])
 
-    def put(self, plugins: List[PluginGenerator]):
-        return self._method_setter('PUT', plugins)
+    def put(self, plugins: List[PluginGenerator] = None):
+        return self._method_setter('PUT', plugins or [])
 
-    def update(self, plugins: List[PluginGenerator]):
-        return self._method_setter('UPDATE', plugins)
+    def update(self, plugins: List[PluginGenerator] = None):
+        return self._method_setter('UPDATE', plugins or [])
 
-    def delete(self, plugins: List[PluginGenerator]):
-        return self._method_setter('DELETE', plugins)
+    def delete(self, plugins: List[PluginGenerator] = None):
+        return self._method_setter('DELETE', plugins or [])
 
-    def head(self, plugins: List[PluginGenerator]):
-        return self._method_setter('HEAD', plugins)
+    def head(self, plugins: List[PluginGenerator] = None):
+        return self._method_setter('HEAD', plugins or [])

@@ -1,20 +1,22 @@
 from example.infrastructure.db.database import Todos
-from machine.resources import JsonRPCResource
+from example.infrastructure.db.session import session
 
-from example.api.scopes import api
-
-
-rpc = api.add(JsonRPCResource(name='todo_jsonrpc', path='/public/jsonrpc$'))
+from machine.plugins import JsonRPCResource, dependency
 
 
-@rpc.method
+public = JsonRPCResource()
+
+db_plugin = dependency('db', session)
+
+
+@public.method(plugins=[db_plugin])
 async def get_todos(db: Todos, *args, **kwargs) -> dict:
     return {
         "todos": await db.all()
     }
 
 
-@rpc.method
+@public.method(plugins=[db_plugin])
 async def delete_todo(db: Todos, todo: str, *args, **kwargs) -> dict:
     await db.remove(todo)
 
@@ -24,7 +26,7 @@ async def delete_todo(db: Todos, todo: str, *args, **kwargs) -> dict:
     }
 
 
-@rpc.method
+@public.method(plugins=[db_plugin])
 async def add_todo(db: Todos, todo: str, *args, **kwargs) -> dict:
     await db.add(todo)
 

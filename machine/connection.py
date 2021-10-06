@@ -1,7 +1,7 @@
 import json
 
 from yarl import URL
-from typing import Union, Tuple, List, Dict
+from typing import Union, List, Dict
 
 from .enums import SendEventType, HTTPMethod
 from .exceptions import ConnectionClosed
