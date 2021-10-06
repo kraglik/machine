@@ -1,10 +1,22 @@
 from .content_type import content_type
-from .resource import resource
+from .conn_type import conn_type
 from .accepts import accepts
+from .method import method
+from .path import path
+from .rest import RESTResource
+from .dependency import dependency
+from .options import options
+from .sequence import sequence
 
 
 __all__ = [
+    'options',
+    'sequence',
     'content_type',
-    'resource',
-    'accepts'
+    'dependency',
+    'accepts',
+    'conn_type',
+    'method',
+    'path',
+    'RESTResource'
 ]

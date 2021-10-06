@@ -1,11 +1,11 @@
-from typing import List
+from typing import List, Callable
 
 from machine.connection import Connection
 from machine.exceptions.plugins.accept import UnsupportedResponseTypeError
 from machine.plugin import Plugin, PluginResult
 
 
-class accepts(Plugin):
+class Accepts(Plugin):
 
     CONTENT_TYPES_MAP = {
         "html": ["text/html", "application/xhtml+xml"],
@@ -14,16 +14,20 @@ class accepts(Plugin):
     }
 
     def __init__(self, *accepted: str):
-        self.__accepted = []
+        self._accepted = []
 
         for content_type in accepted:
-            self.__accepted.extend(self.CONTENT_TYPES_MAP.get(content_type, [content_type.encode('utf-8')]))
+            self._accepted.extend(self.CONTENT_TYPES_MAP.get(content_type, [content_type.encode('utf-8')]))
 
     async def __call__(self, conn: Connection, params: dict) -> PluginResult:
         if "*/*" in conn.accept:
             return conn, params
 
-        if not all(accepted in conn.accept for accepted in self.__accepted):
+        if not all(accepted in conn.accept for accepted in self._accepted):
             raise UnsupportedResponseTypeError()
 
         return conn, params
+
+
+def accepts(*accepted: str) -> Callable[[], Plugin]:
+    return lambda: Accepts(*accepted)

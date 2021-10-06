@@ -4,12 +4,15 @@ from typing import Dict, Union
 
 from machine.connection import Connection
 from machine.enums import HTTPMethod
-from machine.exceptions.resource import BadRequestResourceError, MethodNotAllowedResourceError
-from machine.exceptions.resources.jsonrpc import BadJsonRPCRequestError, JsonRPCMethodNotFoundError, \
-    MachineJsonRPCError, MethodNotAllowedJsonRPCError, WrongJsonRPCParamsError
-from machine.path import Path
-from machine.plugin import PluginResult
 from machine.resource import Resource
+from machine.exceptions.resource import BadRequestResourceError
+from machine.exceptions.resource import MethodNotAllowedResourceError
+from machine.exceptions.resources.jsonrpc import BadJsonRPCRequestError
+from machine.exceptions.resources.jsonrpc import JsonRPCMethodNotFoundError
+from machine.exceptions.resources.jsonrpc import MachineJsonRPCError
+from machine.exceptions.resources.jsonrpc import MethodNotAllowedJsonRPCError
+from machine.exceptions.resources.jsonrpc import WrongJsonRPCParamsError
+from machine.plugin import Plugin, PluginResult
 from machine.response import Response
 
 
@@ -19,10 +22,9 @@ class JsonRPCMethod:
     function: callable
 
 
-class JsonRPCResource(Resource):
-    def __init__(self, name: str, path: Union[str, Path]):
-        super().__init__(name, path)
-        self._methods: Dict[str, JsonRPCMethod] = {}
+class JsonRPCHandler(Plugin):
+    def __init__(self, methods: Dict[str, JsonRPCMethod]):
+        self._methods: Dict[str, JsonRPCMethod] = methods
 
     @property
     def method(self):
@@ -139,3 +141,19 @@ class JsonRPCResource(Resource):
             return await method(method_params, **params)
         elif method_params is None:
             return await method(**params)
+
+
+class JsonRPCResource(Resource):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._methods: Dict[str, JsonRPCMethod] = {}
+
+    @property
+    def method(self):
+        def wrapper(f):
+            self._methods[f.__name__] = JsonRPCMethod(function=f, method_name=f.__name__)
+
+        return wrapper
+
+    def plugin(self):
+        return JsonRPCHandler(methods=self._methods)

@@ -25,7 +25,7 @@ class DefaultErrorRenderer(ErrorRenderer):
     FORBIDDEN_403 = "403 Forbidden"
 
     def __init__(self):
-        self.__errors = {
+        self._errors = {
             400: self.BAD_REQUEST_400,
             403: self.FORBIDDEN_403,
             404: self.NOT_FOUND_404,
@@ -46,7 +46,7 @@ class DefaultErrorRenderer(ErrorRenderer):
         status_code = status_code or error.status_code
 
         await conn.send_text(
-            body=self.__errors[status_code],
+            body=self._errors[status_code],
             status_code=status_code,
             headers={}
         )

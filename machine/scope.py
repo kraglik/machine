@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import List, Union, Callable
 
 from machine.connection import Connection
 from machine.path import Path
@@ -12,7 +12,7 @@ class Scope(Plugin):
     def __init__(
             self,
             path: Union[str, Path],
-            pipelines: List[Pipeline] = [],
+            pipelines: List[Callable[[], Pipeline]] = [],
             scopes: List['Scope'] = [],
             resources: List[Resource] = []
     ):
@@ -104,6 +104,7 @@ class Scope(Plugin):
         params = {**params, **new_variables, 'path': path}
 
         for pipeline in self._pipelines:
+            pipeline = pipeline()
             conn, params = await pipeline(conn, params)
             if conn is None:
                 break
@@ -113,10 +114,8 @@ class Scope(Plugin):
         return Right((conn, params, applied_plugins))
 
     async def _iterate_scopes(self, conn: Connection, params: dict) -> Either:
-        applied_scopes = []
-
         if not self._scopes:
-            return Left((conn, params, applied_scopes))
+            return Left((conn, params))
 
         new_conn, new_params = None, {}
 
@@ -124,13 +123,12 @@ class Scope(Plugin):
             new_conn, new_params = await scope(conn, params)
 
             if new_conn is not None:
-                applied_scopes.append(scope)
                 break
 
         if new_conn is None:
-            return Left((conn, params, applied_scopes))
+            return Left((conn, params))
 
-        return Right((new_conn, new_params, applied_scopes))
+        return Right((new_conn, new_params))
 
     async def _iterate_resources(self, conn: Connection, params: dict) -> Either:
         path = params['path']
@@ -145,9 +143,12 @@ class Scope(Plugin):
             if 'path' in resource_params:
                 del resource_params['path']
 
-            new_conn, new_params = await resource(conn, resource_params)
+            plugin = resource.plugin()
+            new_conn, new_params = await plugin(conn, resource_params)
 
             if new_conn is not None:
-                return Right((new_conn, new_params, [resource]))
+                plugin.destruct(new_conn, new_params)
+                return Right((new_conn, new_params))
 
-        return Left((conn, params, []))
+        return Left((conn, params))
+

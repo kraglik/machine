@@ -18,12 +18,12 @@ class Either(ABC):
 
 class Left(Either):
 
-    def __init__(self, value):
-        self.__value = value
+    def __init__(self, value = None):
+        self._value = value
 
     @property
     def value(self):
-        return self.__value
+        return self._value
 
     def is_left(self) -> bool:
         return True
@@ -35,11 +35,11 @@ class Left(Either):
 class Right(Either):
 
     def __init__(self, value):
-        self.__value = value
+        self._value = value
 
     @property
     def value(self):
-        return self.__value
+        return self._value
 
     def is_left(self) -> bool:
         return False

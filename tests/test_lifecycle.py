@@ -9,26 +9,26 @@ api = app.scope('/api')
 
 class StateTracker:
     def __init__(self):
-        self.__started = False
-        self.__shutdown = False
+        self._started = False
+        self._shutdown = False
 
     def start(self):
-        self.__started = True
+        self._started = True
 
     def stop(self):
-        self.__shutdown = True
+        self._shutdown = True
 
     def reset(self):
-        self.__started = False
-        self.__shutdown = False
+        self._started = False
+        self._shutdown = False
 
     @property
     def started(self):
-        return self.__started
+        return self._started
 
     @property
     def shutdown(self):
-        return self.__shutdown
+        return self._shutdown
 
 
 def test_lifecycle(test_client_factory):

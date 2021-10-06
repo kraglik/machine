@@ -7,10 +7,10 @@ class Path:
     _param_regex = r"{(?P<param>\w+)}"
 
     def __init__(self, path: str):
-        self.__pattern = self._format_pattern(path)
+        self._pattern = self._format_pattern(path)
 
     def parse(self, path: str) -> Either:
-        match = re.match(self.__pattern, path)
+        match = re.match(self._pattern, path)
 
         if match is None:
             return Left("Path didn't match with given pattern")
@@ -34,3 +34,5 @@ class Path:
 
         return regex
 
+    def __str__(self):
+        return f"Path('{self._pattern}')"

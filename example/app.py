@@ -3,15 +3,13 @@ import logging
 from machine import Machine
 
 from example.api.scopes import api
-from example.api.v1.rest import todo_r
-from example.api.v1.jsonrpc import rpc
 
 logger = logging.getLogger(__name__)
 
 
 app = Machine()
 
-app.add(api)
+app.add_root(api)
 
 
 @app.on_startup

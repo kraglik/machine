@@ -1,13 +1,19 @@
-from machine import Scope, Pipeline
-from machine.plugins import resource
+from machine.plugins import options, sequence, path
 
-from example.infrastructure.db.session import session_constructor, session_destructor
+from example.api.v1.rest import todo_r, name_r
 
-api = Scope('/api')
-api.pipeline([
-    resource(
-        name='db',
-        constructor=session_constructor,
-        destructor=session_destructor
-    )
+api_v1 = sequence([
+    path('/v1'),
+    options([
+        todo_r,
+        name_r
+    ])
+])
+
+
+api = sequence([
+    path('/api'),
+    options([
+        api_v1
+    ])
 ])
