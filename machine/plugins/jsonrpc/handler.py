@@ -59,12 +59,13 @@ class JsonRPCHandlerPlugin(Plugin):
 
             handler = self._methods[method_name]
 
-            plugin_result = await sequence(handler.plugins)()(conn, params)
+            if handler.plugins:
+                plugin_result = await sequence(handler.plugins)()(conn, params)
 
-            if plugin_result.is_left():
-                return plugin_result
+                if plugin_result.is_left():
+                    return plugin_result
 
-            conn, params = plugin_result.value
+                conn, params = plugin_result.value
 
             params = params.copy()
             del params['__path__']
