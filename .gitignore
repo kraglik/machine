@@ -1,3 +1,5 @@
 /.idea
 /.pytest_cache
+/machine_web.egg-info
+/dist
 *.pyc

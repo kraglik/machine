@@ -1,5 +1,6 @@
 from typing import List, Dict
 
+from machine.exceptions.machine import MachineError
 from machine.plugin import Plugin
 from machine.plugins.sequence import sequence
 from machine.connection import Connection
@@ -59,18 +60,19 @@ class JsonRPCHandlerPlugin(Plugin):
 
             handler = self._methods[method_name]
 
-            plugin_result = await sequence(handler.plugins)()(conn, params)
+            if handler.plugins:
+                plugin_result = await sequence(handler.plugins)()(conn, params)
 
-            if plugin_result.is_left():
-                return plugin_result
+                if plugin_result.is_left():
+                    return plugin_result
 
-            conn, params = plugin_result.value
+                conn, params = plugin_result.value
 
             params = params.copy()
             del params['__path__']
 
             result = await self._execute(handler.method, params, method_params)
-        except MachineJsonRPCError as e:
+        except MachineError as e:
             body.update({'error': {'status_code': e.status_code, 'message': e.message}})
             await conn.send_json(
                 body=body,
