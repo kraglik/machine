@@ -1,9 +1,9 @@
-from typing import List, Callable
+from typing import Callable
 
 from machine.connection import Connection
 from machine.exceptions.plugins.accept import UnsupportedResponseTypeError
-from machine.plugin import Plugin, PluginResult
-from machine.utils import Either, Right
+from machine.plugin import Plugin
+from machine.test_client import Params
 
 
 class Accepts(Plugin):
@@ -20,14 +20,12 @@ class Accepts(Plugin):
         for content_type in accepted:
             self._accepted.extend(self.CONTENT_TYPES_MAP.get(content_type, [content_type.encode('utf-8')]))
 
-    async def __call__(self, conn: Connection, params: dict) -> Either:
-        if "*/*" in conn.accept:
-            return Right((conn, params))
+    async def __call__(self, conn: Connection, params: Params):
+        if "*/*" in conn.accept or all(accepted in conn.accept for accepted in self._accepted):
+            yield conn, params
+            return
 
-        if not all(accepted in conn.accept for accepted in self._accepted):
-            raise UnsupportedResponseTypeError()
-
-        return Right((conn, params))
+        raise UnsupportedResponseTypeError()
 
 
 def accepts(*accepted: str) -> Callable[[], Plugin]:

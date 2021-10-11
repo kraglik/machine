@@ -9,17 +9,7 @@ logger = logging.getLogger(__name__)
 
 app = Machine()
 
-app.add_root(api)
-
-
-@app.on_startup
-async def say_hi(_):
-    logger.info('App is starting/restarting...')
-
-
-@app.on_shutdown
-async def say_bye(_):
-    logger.info('App is shutting down...')
+app.root = api
 
 
 if __name__ == '__main__':

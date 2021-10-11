@@ -1,32 +1,27 @@
 from typing import List, Optional
 
-from machine.plugin import Plugin, PluginResult
+from machine.exceptions.plugins.options import SuitableArmNotFound
+from machine.params import Parameters
+from machine.plugin import Plugin
 from machine.connection import Connection
 from machine.types import PluginGenerator
-from machine.utils import Either, Left
 
 
 class Options(Plugin):
     def __init__(self, arms: List[PluginGenerator]):
         self._arms = arms
-        self._applied_arm: Optional[Plugin] = None
 
-    async def __call__(self, conn: Connection, params: dict) -> Either:
+    async def __call__(self, conn: Connection, params: Parameters):
         for arm in self._arms:
-            plugin = arm()
-            result = await plugin(conn, params)
+            try:
+                async for new_conn, new_params in arm()(conn, params):
+                    yield new_conn, new_params
+                    return
 
-            if result.is_right():
-                self._applied_arm = plugin
-                return result
+            except Exception as e:
+                pass
 
-        return Left()
-
-    async def destruct(self, conn: Connection, params: dict) -> PluginResult:
-        if self._applied_arm:
-            conn, params = await self._applied_arm.destruct(conn, params)
-
-        return conn, params
+        raise SuitableArmNotFound()
 
 
 def options(arms: List[PluginGenerator]) -> PluginGenerator:

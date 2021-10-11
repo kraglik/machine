@@ -3,6 +3,7 @@ from typing import Dict, Tuple, Union
 
 from machine.connection import Connection
 from machine.enums import HTTPMethod
+from machine.params import Parameters
 
 
 @dataclass(frozen=True)
@@ -37,7 +38,7 @@ class Request:
         return self.conn.has_next_chunk
 
     @staticmethod
-    def from_conn(conn: Connection, params: dict) -> 'Request':
+    def from_conn(conn: Connection, params: Parameters) -> 'Request':
         return Request(
             conn=conn,
             url=conn.url,
@@ -56,5 +57,5 @@ class Request:
             http_version=conn.http_version,
             content_type=conn.request_headers.get('content-type', b'text/plain').decode('utf-8'),
             query_params=conn.query_params,
-            path_params=params.get('__path__', {}).get('params', {})
+            path_params=params.path.params
         )

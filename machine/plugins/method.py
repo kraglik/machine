@@ -1,8 +1,8 @@
 from machine.connection import Connection
 from machine.exceptions.resource import MethodNotAllowedResourceError
+from machine.params import Parameters
 from machine.plugin import Plugin
 from machine.types import PluginGenerator
-from machine.utils import Either, Right, Left
 
 
 class Method(Plugin):
@@ -11,19 +11,17 @@ class Method(Plugin):
         self._allowed = allowed
         self._only = only
 
-    async def __call__(self, conn: Connection, params: dict) -> Either:
+    async def __call__(self, conn: Connection, params: Parameters):
         method_match = conn.method.value == self._method
-
-        if method_match and self._allowed:
-            return Right((conn, params))
-
-        if method_match and not self._allowed:
-            raise MethodNotAllowedResourceError()
 
         if not method_match and self._only:
             raise MethodNotAllowedResourceError()
 
-        return Left()
+        if method_match and self._allowed:
+            yield conn, params
+            return
+
+        raise MethodNotAllowedResourceError()
 
 
 def method(method_name: str, allowed: bool = True, only: bool = False) -> PluginGenerator:

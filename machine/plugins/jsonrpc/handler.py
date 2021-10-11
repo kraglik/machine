@@ -1,11 +1,14 @@
 from typing import List, Dict
 
+from machine.params import Parameters
 from machine.plugin import Plugin
 from machine.plugins.sequence import sequence
 from machine.connection import Connection
 from machine.types import PluginGenerator
-from machine.utils import Either, Right, Left
-from machine.exceptions.resources.jsonrpc import MachineJsonRPCError, BadJsonRPCRequestError, JsonRPCMethodNotFoundError
+from machine.exceptions.plugins.jsonrpc import MachineJsonRPCError
+from machine.exceptions.plugins.jsonrpc import JsonRPCInternalError
+from machine.exceptions.plugins.jsonrpc import JsonRPCMethodNotFoundError
+from machine.exceptions.plugins.jsonrpc import BadJsonRPCRequestError
 
 
 class JsonRPCHandler:
@@ -39,55 +42,48 @@ class JsonRPCHandlerPlugin(Plugin):
             'params': data.get('params', None)
         }
 
-    async def _execute(self, method, params, method_params):
-        if method_params is None:
-            return await method(**params)
-        elif not isinstance(method_params, dict):
-            return await method(method_params, **params)
-        else:
-            return await method(**{**params, **method_params})
+    async def _execute(self, request_id, method, params, method_params):
+        try:
+            if method_params is None:
+                return await method(**params.params)
+            elif not isinstance(method_params, dict):
+                return await method(method_params, **params.params)
+            else:
+                return await method(**{**params.params, **method_params})
+        except Exception as exception:
+            if isinstance(exception, MachineJsonRPCError):
+                raise exception
 
-    async def __call__(self, conn: Connection, params: dict) -> Either:
+            raise JsonRPCInternalError(
+                request_id=request_id,
+                method_name=method,
+                message=str(exception)
+            )
+
+    async def __call__(self, conn: Connection, params: Parameters):
         body = await self._get_jsonrpc_body(conn)
         method_params = body['params']
         method_name = body['method']
         del body['params']
 
-        try:
-            if method_name not in self._methods:
-                raise JsonRPCMethodNotFoundError(method_name=method_name)
+        if method_name not in self._methods:
+            raise JsonRPCMethodNotFoundError(method_name=method_name)
 
-            handler = self._methods[method_name]
+        handler = self._methods[method_name]
 
-            plugin_result = await sequence(handler.plugins)()(conn, params)
+        async for conn, params in sequence(handler.plugins)()(conn, params):
+            pass
 
-            if plugin_result.is_left():
-                return plugin_result
+        result = await self._execute(body['id'], handler.method, params, method_params)
 
-            conn, params = plugin_result.value
-
-            params = params.copy()
-            del params['__path__']
-
-            result = await self._execute(handler.method, params, method_params)
-        except MachineJsonRPCError as e:
-            body.update({'error': {'status_code': e.status_code, 'message': e.message}})
-            await conn.send_json(
-                body=body,
-                status_code=e.status_code,
-                headers={},
-                cookies={},
-            )
-            return Right((conn, params))
-        except Exception as e:
-            raise e
-
-        body.update({'result': result})
         await conn.send_json(
-            body=body,
+            body={
+                **body,
+                'result': result
+            },
             status_code=200,
-            headers={},
-            cookies={}
+            cookies={},
+            headers={}
         )
 
-        return Right((conn, params))
+        yield conn, params

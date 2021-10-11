@@ -282,6 +282,7 @@ class Connection:
             encoding=encoding,
             chunk_size_bytes=chunk_size_bytes
         )
+        await self.close()
 
     async def send_text(
             self,

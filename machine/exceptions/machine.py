@@ -8,6 +8,9 @@ class MachineError(Exception, ABC):
     def __init__(self):
         super().__init__(self.message)
 
+    def __str__(self):
+        return self.message
+
 
 class MachineSuspiciousOperationError(MachineError):
     message = 'Suspicious operation'
@@ -23,3 +26,7 @@ class UnexpectedContentType(MachineSuspiciousOperationError):
     message = 'Unexpected content type'
     status_code = 403
 
+
+class ResourceNotFound(MachineError):
+    message = 'Resource not found'
+    status_code = 404

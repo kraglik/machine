@@ -7,12 +7,14 @@ from machine.plugins.sequence import sequence
 from machine.plugins.conn_type import conn_type
 from machine.plugins.method import method
 from machine.plugins.path import path
+from .error_plugin import rest_error_plugin
 from .handler import RESTHandler
 from machine.types import PluginGenerator
+from .error_renderer import ErrorRenderer, DefaultErrorRenderer
 
 
 class RESTResource(Resource):
-    def __init__(self, path: Optional[str] = None):
+    def __init__(self, path: Optional[str] = None, error_renderer: ErrorRenderer = None):
         self._method_table: Dict[str, Optional[RESTHandler]] = {
             'GET': None,
             'POST': None,
@@ -22,9 +24,10 @@ class RESTResource(Resource):
             'HEAD': None,
         }
         self._path = path
+        self._error_renderer = error_renderer or DefaultErrorRenderer()
 
     def __call__(self) -> Plugin:
-        prefix = [conn_type('http')]
+        prefix = [conn_type('http'), rest_error_plugin(self._error_renderer)]
         prefix += [] if self._path is None else [path(self._path)]
 
         return sequence([

@@ -3,22 +3,19 @@ from typing import List
 from machine.plugin import Plugin
 from machine.connection import Connection
 from machine.types import PluginGenerator
-from machine.utils import Either, Right
 from .request import Request
 from .response import Response
+from machine.params import Parameters
 
 
 class RESTHandlerPlugin(Plugin):
     def __init__(self, method):
         self._method = method
 
-    async def __call__(self, conn: Connection, params: dict) -> Either:
+    async def __call__(self, conn: Connection, params: Parameters):
         request = Request.from_conn(conn, params)
 
-        method_params = params.copy()
-        del method_params['__path__']
-
-        response = await self._method(request, method_params)
+        response = await self._method(request, params.params)
         assert isinstance(response, Response), "Unexpected return type for rest method"
 
         await conn.send_content(
@@ -29,7 +26,7 @@ class RESTHandlerPlugin(Plugin):
             content_type=response.content_type
         )
 
-        return Right((conn, params))
+        yield conn, params
 
 
 class RESTHandler:

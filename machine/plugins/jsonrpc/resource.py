@@ -8,8 +8,11 @@ from machine.plugins.conn_type import conn_type
 from machine.plugins.content_type import content_type
 from machine.plugins.method import method
 from machine.plugins.path import path
+from .error_plugin import jsonrpc_error_plugin
 from .handler import JsonRPCHandler, JsonRPCHandlerPlugin
 from machine.types import PluginGenerator
+from ..rest.error_plugin import rest_error_plugin
+from ..rest.error_renderer import DefaultErrorRenderer
 
 
 class JsonRPCResource(Resource):
@@ -26,8 +29,10 @@ class JsonRPCResource(Resource):
     def __call__(self) -> Plugin:
         prefix = [
             conn_type('http'),
+            rest_error_plugin(renderer=DefaultErrorRenderer()),
             method('POST', only=True),
             content_type('application/json'),
+            jsonrpc_error_plugin(),
         ]
         prefix += [] if self._path is None else [path(self._path)]
 
