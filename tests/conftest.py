@@ -2,7 +2,7 @@ import functools
 
 import pytest
 
-from machine.test_client import TestClient
+from machine import TestClient
 
 
 @pytest.fixture

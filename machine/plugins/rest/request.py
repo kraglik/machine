@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Dict, Tuple, Union
+from typing import Dict, Tuple, Union, Any
 
 from machine.connection import Connection
 from machine.enums import HTTPMethod
@@ -20,6 +20,7 @@ class Request:
     content_type: str
     query_params: Dict[str, str]
     path_params: Dict[str, str]
+    params: Dict[str, Any]
 
     async def body(self) -> bytes:
         return await self.conn.body()
@@ -57,5 +58,6 @@ class Request:
             http_version=conn.http_version,
             content_type=conn.request_headers.get('content-type', b'text/plain').decode('utf-8'),
             query_params=conn.query_params,
-            path_params=params.path.params
+            path_params=params.path.params,
+            params=params.params
         )

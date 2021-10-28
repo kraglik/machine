@@ -2,8 +2,8 @@ import pytest
 
 from machine import Machine
 from machine.plugins import sequence, options, path, RESTResource
-from machine.plugins.rest.request import Request
-from machine.plugins.rest.response import Response, TextResponse
+from machine.plugins.rest import Request, Response, TextResponse
+from machine.plugins.rest import rest_error_plugin, DefaultErrorRenderer
 
 app = Machine()
 
@@ -11,25 +11,24 @@ v1echo = RESTResource()
 v1name = RESTResource()
 
 
-app.add_root(
-    sequence([
-        path('/api/v1'),
-        options([
-            sequence([
-                path('/echo$'),
-                v1echo
-            ]),
-            sequence([
-                path('/name/{name}$'),
-                v1name
-            ])
+app.root = sequence([
+    rest_error_plugin(DefaultErrorRenderer()),
+    path('/api/v1'),
+    options([
+        sequence([
+            path('/echo$'),
+            v1echo
+        ]),
+        sequence([
+            path('/name/{name}$'),
+            v1name
         ])
     ])
-)
+])
 
 
 @v1echo.post()
-async def echo(request: Request, params: dict):
+async def echo(request: Request):
     return Response(
         body=await request.body(),
         content_type=request.content_type
@@ -37,7 +36,7 @@ async def echo(request: Request, params: dict):
 
 
 @v1name.get()
-async def show_name(request: Request, params: dict) -> Response:
+async def show_name(request: Request) -> Response:
     return TextResponse(request.path_params['name'])
 
 

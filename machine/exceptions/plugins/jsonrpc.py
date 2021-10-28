@@ -23,26 +23,26 @@ class MachineJsonRPCResponseError(MachineJsonRPCError, ABC):
 
 class BadJsonRPCRequestError(MachineJsonRPCRequestError):
     message = 'Bad JsonRPC request'
-    error_code = 400
-    status_code = 8000
+    error_code = 8000
+    status_code = 400
 
 
 class WrongJsonRPCParamsError(MachineJsonRPCRequestError):
     message = 'Wrong JsonRPC params'
-    status_code = 400
     error_code = 8001
+    status_code = 400
 
 
 class MethodNotAllowedJsonRPCError(MachineJsonRPCRequestError):
     message = 'Method not allowed'
-    status_code = 405
     error_code = 8002
+    status_code = 405
 
 
 class JsonRPCMethodNotFoundError(MachineJsonRPCResponseError):
     message = 'Method not found'
-    status_code = 404
     error_code = 8003
+    status_code = 404
 
     def __init__(self, method_name: str, *args, **kwargs):
         super().__init__(method_name, *args, **kwargs)

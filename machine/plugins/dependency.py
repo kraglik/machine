@@ -1,11 +1,15 @@
-from typing import Callable, AsyncGenerator
+from typing import Callable, AsyncGenerator, Union
+from inspect import signature
 
 from machine.connection import Connection
 from machine.params import Parameters
 from machine.plugin import Plugin
 from machine.types import PluginGenerator
 
-DependencyGenerator = Callable[[], AsyncGenerator[any, None]]
+DependencyGenerator = Union[
+    Callable[[], AsyncGenerator[any, None]],
+    Callable[[Connection, Parameters], AsyncGenerator[any, None]],
+]
 
 
 class Dependency(Plugin):
@@ -15,10 +19,15 @@ class Dependency(Plugin):
             resource_gen: DependencyGenerator
     ):
         self._name = name
-        self._resource_gen = resource_gen()
+        self._resource_gen = resource_gen
+        self._accepts_conn_and_params = len(signature(resource_gen).parameters) == 2
 
     async def __call__(self, conn: Connection, params: Parameters):
-        async for obj in self._resource_gen:
+        gen = self._resource_gen(conn, params) \
+            if self._accepts_conn_and_params \
+            else self._resource_gen()
+
+        async for obj in gen:
             yield conn, params.with_new_params({self._name: obj})
 
 

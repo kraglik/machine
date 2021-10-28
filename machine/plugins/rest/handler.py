@@ -4,7 +4,7 @@ from machine.plugin import Plugin
 from machine.connection import Connection
 from machine.types import PluginGenerator
 from .request import Request
-from .response import Response
+from .response import Response, TextResponse, JSONResponse
 from machine.params import Parameters
 
 
@@ -14,8 +14,13 @@ class RESTHandlerPlugin(Plugin):
 
     async def __call__(self, conn: Connection, params: Parameters):
         request = Request.from_conn(conn, params)
+        response = await self._method(request)
 
-        response = await self._method(request, params.params)
+        if isinstance(response, (dict, list, int, float, bool)):
+            response = JSONResponse(response)
+        elif isinstance(response, str):
+            response = TextResponse(response)
+
         assert isinstance(response, Response), "Unexpected return type for rest method"
 
         await conn.send_content(

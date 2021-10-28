@@ -7,12 +7,10 @@ app = Machine()
 
 rpc = JsonRPCResource()
 
-app.add_root(
-    sequence([
-        path('/api/public/jsonrpc$'),
-        rpc
-    ])
-)
+app.root = sequence([
+    path('/api/public/jsonrpc$'),
+    rpc
+])
 
 
 @rpc.method()

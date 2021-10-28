@@ -23,6 +23,7 @@ class DefaultErrorRenderer(ErrorRenderer):
     METHOD_NOT_ALLOWED_405 = "405 Method Not Allowed"
     BAD_REQUEST_400 = "400 Bad Request"
     FORBIDDEN_403 = "403 Forbidden"
+    CONFLICT_409 = "409 Conflict"
 
     def __init__(self):
         self._errors = {
@@ -30,6 +31,7 @@ class DefaultErrorRenderer(ErrorRenderer):
             403: self.FORBIDDEN_403,
             404: self.NOT_FOUND_404,
             405: self.METHOD_NOT_ALLOWED_405,
+            409: self.CONFLICT_409,
             500: self.INTERNAL_ERROR_500
         }
 
@@ -41,8 +43,8 @@ class DefaultErrorRenderer(ErrorRenderer):
     ):
         if not status_code and not isinstance(error, MachineError):
             status_code = 500
-
-        status_code = status_code or error.status_code
+        elif isinstance(error, MachineError):
+            status_code = status_code or error.status_code
 
         await conn.send_text(
             body=self._errors[status_code],

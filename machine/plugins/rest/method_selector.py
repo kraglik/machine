@@ -4,10 +4,11 @@ from machine.exceptions.resource import MethodNotAllowedResourceError
 from machine.plugin import Plugin
 from machine.connection import Connection
 from machine.params import Parameters
+from machine.types import PluginGenerator
 
 
 class MethodSelector(Plugin):
-    def __init__(self, handlers: Dict[str, Plugin]):
+    def __init__(self, handlers: Dict[str, PluginGenerator]):
         self._method_handlers = handlers
 
     async def __call__(self, conn: Connection, params: Parameters):
@@ -18,6 +19,6 @@ class MethodSelector(Plugin):
             yield conn, params
 
 
-def method_selector(handlers: Dict[str, Plugin]):
+def method_selector(handlers: Dict[str, PluginGenerator]):
     return lambda: MethodSelector(handlers)
 

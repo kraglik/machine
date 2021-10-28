@@ -71,8 +71,9 @@ class JsonRPCHandlerPlugin(Plugin):
 
         handler = self._methods[method_name]
 
-        async for conn, params in sequence(handler.plugins)()(conn, params):
-            pass
+        if handler.plugins:
+            async for conn, params in sequence(handler.plugins)()(conn, params):
+                pass
 
         result = await self._execute(body['id'], handler.method, params, method_params)
 

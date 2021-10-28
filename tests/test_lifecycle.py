@@ -1,11 +1,14 @@
 import pytest
 
 from machine import Machine
-from machine.plugins import options
+from machine.plugins import sequence, options, rest
 
 app = Machine()
 
-app.add_root(options([]))
+app.root = sequence([
+    rest.rest_error_plugin(rest.DefaultErrorRenderer()),
+    options([])
+])
 
 
 class StateTracker:
@@ -36,11 +39,11 @@ def test_lifecycle(test_client_factory):
     tracker = StateTracker()
 
     @app.on_startup
-    async def change_startup_done(_):
+    async def change_startup_done():
         tracker.start()
 
     @app.on_shutdown
-    async def change_shutdown_done(_):
+    async def change_shutdown_done():
         tracker.stop()
 
     tracker.reset()

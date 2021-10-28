@@ -12,8 +12,8 @@ db_plugin = dependency('db', session)
 
 
 @todo_r.get(plugins=[db_plugin])
-async def todo_list_get(request: Request, params: dict) -> Response:
-    db: Todos = params['db']
+async def todo_list_get(request: Request) -> Response:
+    db: Todos = request.params['db']
     return JSONResponse(
         {
             "todos": await db.all()
@@ -23,8 +23,8 @@ async def todo_list_get(request: Request, params: dict) -> Response:
 
 
 @todo_r.post(plugins=[db_plugin])
-async def todo_create(request: Request, params: dict) -> Response:
-    db: Todos = params['db']
+async def todo_create(request: Request) -> Response:
+    db: Todos = request.params['db']
     todo = await request.text()
 
     await db.add(todo)
@@ -39,8 +39,8 @@ async def todo_create(request: Request, params: dict) -> Response:
 
 
 @todo_r.delete(plugins=[db_plugin])
-async def todo_delete(request: Request, params: dict) -> Response:
-    db: Todos = params['db']
+async def todo_delete(request: Request) -> Response:
+    db: Todos = request.params['db']
     todo = await request.text()
 
     await db.remove(todo)
@@ -55,8 +55,8 @@ async def todo_delete(request: Request, params: dict) -> Response:
 
 
 @name_r.get(plugins=[db_plugin])
-async def greet(request: Request, params: dict) -> Response:
-    db: Todos = params['db']
+async def greet(request: Request) -> Response:
+    db: Todos = request.params['db']
     name: str = request.path_params['name']
 
     todos = await db.all()

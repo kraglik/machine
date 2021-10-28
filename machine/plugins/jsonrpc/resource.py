@@ -26,7 +26,7 @@ class JsonRPCResource(Resource):
     def _handler(self):
         return lambda: JsonRPCHandlerPlugin(methods=self._method_table)
 
-    def __call__(self) -> Plugin:
+    def __call__(self):
         prefix = [
             conn_type('http'),
             rest_error_plugin(renderer=DefaultErrorRenderer()),
