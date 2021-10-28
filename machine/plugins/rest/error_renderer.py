@@ -39,7 +39,6 @@ class DefaultErrorRenderer(ErrorRenderer):
             error: Union[Exception, MachineError, str],
             status_code: Optional[int] = None
     ):
-
         if not status_code and not isinstance(error, MachineError):
             status_code = 500
 

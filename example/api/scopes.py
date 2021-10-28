@@ -1,3 +1,4 @@
+from machine.plugins.rest import DefaultErrorRenderer, rest_error_plugin
 from machine.plugins import options, sequence, path
 
 from example.api.v1.rest import todo_r, name_r
@@ -23,6 +24,7 @@ api_v2 = sequence([
 
 
 api = sequence([
+    rest_error_plugin(DefaultErrorRenderer()),
     path('/api'),
     options([
         api_v1,
