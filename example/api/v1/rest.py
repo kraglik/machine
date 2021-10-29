@@ -1,12 +1,15 @@
+import datetime
+
 from example.infrastructure.db.database import Todos
 from example.infrastructure.db.session import session
+
 from machine.plugins.rest.request import Request
 from machine.plugins import RESTResource, dependency
 from machine.plugins.rest.response import Response, JSONResponse, HTMLResponse
 
 
-todo_r = RESTResource(path='/todo$')
-name_r = RESTResource(path='/todos/{name}$')
+todo_r = RESTResource()
+name_r = RESTResource()
 
 db_plugin = dependency('db', session)
 
@@ -69,4 +72,8 @@ async def greet(request: Request) -> Response:
         """
         + ''.join(f"<li>{todo}</li>" for todo in todos)
         + "</ul>"
+        + f"""
+        </br>
+        Server time is <b>{datetime.datetime.now().astimezone().strftime('%d-%m-%Y %T %z')}</b>
+        """
     )

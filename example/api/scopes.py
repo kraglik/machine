@@ -7,8 +7,14 @@ from example.api.v2.jsonrpc import public
 api_v1 = sequence([
     path('/v1'),
     options([
-        todo_r,
-        name_r
+        sequence([
+            path('/todo$'),
+            todo_r
+        ]),
+        sequence([
+            path('/todos/{name}$'),
+            name_r
+        ])
     ])
 ])
 

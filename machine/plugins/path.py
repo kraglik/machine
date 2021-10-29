@@ -1,12 +1,9 @@
-from typing import Dict, Union
-
 from machine.exceptions.machine import ResourceNotFound
 from machine.params import Parameters
 from machine.path import Path
 from machine.connection import Connection
 from machine.plugin import Plugin
 from machine.types import PluginGenerator
-from machine.utils import Either, Right
 
 
 class PathPlugin(Plugin):

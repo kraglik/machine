@@ -10,7 +10,7 @@ from machine.plugins.method import method
 from machine.plugins.path import path
 from .error_plugin import jsonrpc_error_plugin
 from .handler import JsonRPCHandler, JsonRPCHandlerPlugin
-from machine.types import PluginGenerator
+from machine.types import PluginGenerator, PluginType
 from ..rest.error_plugin import rest_error_plugin
 from ..rest.error_renderer import DefaultErrorRenderer
 
@@ -26,7 +26,7 @@ class JsonRPCResource(Resource):
     def _handler(self):
         return lambda: JsonRPCHandlerPlugin(methods=self._method_table)
 
-    def __call__(self):
+    def __call__(self) -> PluginType:
         prefix = [
             conn_type('http'),
             rest_error_plugin(renderer=DefaultErrorRenderer()),

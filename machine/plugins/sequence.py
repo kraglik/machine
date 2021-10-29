@@ -1,4 +1,4 @@
-from typing import List, AsyncGenerator
+from typing import List, AsyncIterator
 
 from machine.params import Parameters
 from machine.plugin import Plugin
@@ -12,7 +12,7 @@ class Sequence(Plugin):
         self._plugins = plugins
 
     async def __call__(self, conn: Connection, params: Parameters):
-        applied_plugins: List[AsyncGenerator] = []
+        applied_plugins: List[AsyncIterator] = []
 
         try:
             for plugin_gen in self._plugins:

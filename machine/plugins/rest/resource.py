@@ -9,7 +9,7 @@ from machine.plugins.method import method
 from machine.plugins.path import path
 from .error_plugin import rest_error_plugin
 from .handler import RESTHandler
-from machine.types import PluginGenerator
+from machine.types import PluginGenerator, PluginType
 from .error_renderer import ErrorRenderer, DefaultErrorRenderer
 from .method_selector import method_selector
 
@@ -27,9 +27,9 @@ class RESTResource(Resource):
         self._path = path
         self._error_renderer = error_renderer or DefaultErrorRenderer()
 
-    def __call__(self) -> Plugin:
-        prefix = [conn_type('http'), rest_error_plugin(self._error_renderer)]
-        prefix += [] if self._path is None else [path(self._path)]
+    def __call__(self) -> PluginType:
+        prefix = [] if self._path is None else [path(self._path)]
+        prefix += [conn_type('http'), rest_error_plugin(self._error_renderer)]
 
         return sequence([
             *prefix,
