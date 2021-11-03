@@ -14,9 +14,16 @@ class Options(Plugin):
     async def __call__(self, conn: Connection, params: Parameters):
         for arm in self._arms:
             try:
-                async for new_conn, new_params in arm()(conn, params):
-                    yield new_conn, new_params
-                    return
+                plugin = arm()(conn, params)
+                new_conn, new_params = await plugin.__anext__()
+                yield new_conn, new_params
+
+                try:
+                    await plugin.__anext__()
+                except StopAsyncIteration:
+                    pass
+
+                return
 
             except Exception as e:
                 pass

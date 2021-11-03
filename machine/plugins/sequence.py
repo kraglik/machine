@@ -23,6 +23,13 @@ class Sequence(Plugin):
                 applied_plugins.append(plugin)
 
             yield conn, params
+
+            for plugin in reversed(applied_plugins):
+                try:
+                    await plugin.__anext__()
+                except StopAsyncIteration:
+                    continue
+
             return
 
         except Exception as exception:
