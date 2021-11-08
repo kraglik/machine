@@ -11,7 +11,9 @@ class Method(Plugin):
         self._allowed = allowed
         self._only = only
 
-    async def __call__(self, conn: Connection, params: Parameters) -> PluginResult:
+    async def __call__(
+        self, conn: Connection, params: Parameters
+    ) -> PluginResult:
         method_match = conn.method.value == self._method
 
         if not method_match and self._only:

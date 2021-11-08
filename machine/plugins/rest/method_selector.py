@@ -11,7 +11,9 @@ class MethodSelector(Plugin):
     def __init__(self, handlers: Dict[str, PluginGenerator]):
         self._method_handlers = handlers
 
-    async def __call__(self, conn: Connection, params: Parameters) -> PluginResult:
+    async def __call__(
+        self, conn: Connection, params: Parameters
+    ) -> PluginResult:
         if conn.method.value not in self._method_handlers:
             raise MethodNotAllowedResourceError()
 

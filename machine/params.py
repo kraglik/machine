@@ -23,9 +23,12 @@ class Parameters:
     def from_conn(conn: Connection) -> "Parameters":
         return Parameters(path=PathParameters.from_conn(conn), params={})
 
-    def with_updated_path(self, params: Dict[str, str], remaining: str) -> "Parameters":
+    def with_updated_path(
+        self, params: Dict[str, str], remaining: str
+    ) -> "Parameters":
         return Parameters(
-            path=PathParameters(remaining=remaining, params=params), params=self.params
+            path=PathParameters(remaining=remaining, params=params),
+            params=self.params,
         )
 
     def with_new_params(self, new_params: Dict[str, Any]) -> "Parameters":

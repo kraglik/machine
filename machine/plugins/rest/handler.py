@@ -1,4 +1,4 @@
-from typing import List, Callable
+from typing import List
 
 from machine.plugin import Plugin
 from machine.connection import Connection
@@ -6,13 +6,16 @@ from machine.types import PluginGenerator, PluginResult
 from .request import Request
 from .response import Response, TextResponse, JSONResponse
 from machine.params import Parameters
+from .types import RESTMethod
 
 
 class RESTHandlerPlugin(Plugin):
-    def __init__(self, method: Callable) -> None:
+    def __init__(self, method: RESTMethod) -> None:
         self._method = method
 
-    async def __call__(self, conn: Connection, params: Parameters) -> PluginResult:
+    async def __call__(
+        self, conn: Connection, params: Parameters
+    ) -> PluginResult:
         request = Request.from_conn(conn, params)
         response = await self._method(request)
 
@@ -21,7 +24,9 @@ class RESTHandlerPlugin(Plugin):
         elif isinstance(response, str):
             response = TextResponse(response)
 
-        assert isinstance(response, Response), "Unexpected return type for rest method"
+        assert isinstance(
+            response, Response
+        ), "Unexpected return type for rest method"
 
         await conn.send_content(
             body=response.bytes(encoding=response.encoding),
@@ -35,17 +40,17 @@ class RESTHandlerPlugin(Plugin):
 
 
 class RESTHandler:
-    def __init__(self, plugins: List[PluginGenerator], handler: Callable):
+    def __init__(self, plugins: List[PluginGenerator], handler: RESTMethod):
         self._plugins = plugins
         self._handler = handler
 
     @property
-    def handler(self) -> Callable:
+    def handler(self) -> RESTMethod:
         return self._handler
 
     @property
     def plugins(self) -> List[PluginGenerator]:
         return self._plugins
 
-    def __call__(self) -> Callable[[], Plugin]:
+    def __call__(self) -> PluginGenerator:
         return lambda: RESTHandlerPlugin(method=self._handler)

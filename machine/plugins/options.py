@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List
 
 from machine.exceptions.plugins.options import SuitableArmNotFound
 from machine.params import Parameters
@@ -11,7 +11,9 @@ class Options(Plugin):
     def __init__(self, arms: List[PluginGenerator]):
         self._arms = arms
 
-    async def __call__(self, conn: Connection, params: Parameters) -> PluginResult:
+    async def __call__(
+        self, conn: Connection, params: Parameters
+    ) -> PluginResult:
         for arm in self._arms:
             try:
                 plugin = arm()(conn, params)
@@ -25,7 +27,7 @@ class Options(Plugin):
 
                 return
 
-            except Exception as e:
+            except Exception:
                 pass
 
         raise SuitableArmNotFound()

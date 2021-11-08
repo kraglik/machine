@@ -1,5 +1,5 @@
 import logging
-from typing import AsyncGenerator, List, Callable, Union, Coroutine, Optional
+from typing import List, Callable, Optional
 
 import uvicorn
 
@@ -56,7 +56,9 @@ class Machine:
         except Exception:
             await send({"type": "lifespan.shutdown.failed"})
 
-    async def __call__(self, conn_scope: Scope, receive: Receive, send: Send) -> None:
+    async def __call__(
+        self, conn_scope: Scope, receive: Receive, send: Send
+    ) -> None:
         conn = Connection(scope=conn_scope, send=send, receive=receive)
 
         if conn.type == "lifespan":
@@ -72,10 +74,14 @@ class Machine:
 
             except Exception as e:
                 logger.error(
-                    f"Got unhandled exception while handling request: {e}", exc_info=e
+                    f"Got unhandled exception while handling request: {e}",
+                    exc_info=e,
                 )
 
     def run(
-        self, host: str = "127.0.0.1", port: int = 8000, log_level: str = "info"
+        self,
+        host: str = "127.0.0.1",
+        port: int = 8000,
+        log_level: str = "info",
     ) -> None:
         uvicorn.run(self, host=host, port=port, log_level=log_level)

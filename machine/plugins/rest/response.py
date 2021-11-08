@@ -1,6 +1,6 @@
 import json
 
-from typing import Optional, Dict, Union
+from typing import Optional, Dict
 
 from machine.types import BodyType
 
@@ -67,7 +67,9 @@ class HTMLResponse(Response):
         status_code: int = 200,
         encoding: str = "utf-8",
     ):
-        super().__init__(body, content_type, headers, cookies, status_code, encoding)
+        super().__init__(
+            body, content_type, headers, cookies, status_code, encoding
+        )
 
 
 class JSONResponse(Response):
@@ -80,7 +82,9 @@ class JSONResponse(Response):
         status_code: int = 200,
         encoding: str = "utf-8",
     ):
-        super().__init__(body, content_type, headers, cookies, status_code, encoding)
+        super().__init__(
+            body, content_type, headers, cookies, status_code, encoding
+        )
 
 
 class TextResponse(Response):
@@ -93,4 +97,6 @@ class TextResponse(Response):
         status_code: int = 200,
         encoding: str = "utf-8",
     ):
-        super().__init__(body, content_type, headers, cookies, status_code, encoding)
+        super().__init__(
+            body, content_type, headers, cookies, status_code, encoding
+        )

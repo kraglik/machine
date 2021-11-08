@@ -1,0 +1,4 @@
+[flake8]
+ignore = D203,E203,W503
+exclude = .git,__pycache__,docs/source/conf.py,old,build,dist,.mypy_cache,.pytest_cache,machine/test_client.py
+max-complexity = 10

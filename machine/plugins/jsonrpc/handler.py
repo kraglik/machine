@@ -13,7 +13,9 @@ from machine.exceptions.plugins.jsonrpc import BadJsonRPCRequestError
 
 
 class JsonRPCHandler:
-    def __init__(self, plugins: List[PluginGenerator], method: Callable) -> None:
+    def __init__(
+        self, plugins: List[PluginGenerator], method: Callable
+    ) -> None:
         self._plugins = plugins
         self._method = method
 
@@ -68,10 +70,14 @@ class JsonRPCHandlerPlugin(Plugin):
                 raise exception
 
             raise JsonRPCInternalError(
-                request_id=request_id, method_name=method_name, message=str(exception)
+                request_id=request_id,
+                method_name=method_name,
+                message=str(exception),
             )
 
-    async def __call__(self, conn: Connection, params: Parameters) -> PluginResult:
+    async def __call__(
+        self, conn: Connection, params: Parameters
+    ) -> PluginResult:
         body = await self._get_jsonrpc_body(conn)
         method_params = body["params"]
         method_name = body["method"]
@@ -86,7 +92,9 @@ class JsonRPCHandlerPlugin(Plugin):
         handler = self._methods[method_name]
 
         if handler.plugins:
-            async for conn, params in sequence(handler.plugins)()(conn, params):
+            async for conn, params in sequence(handler.plugins)()(
+                conn, params
+            ):
                 pass
 
         result = await self._execute(
@@ -94,7 +102,10 @@ class JsonRPCHandlerPlugin(Plugin):
         )
 
         await conn.send_json(
-            body={**body, "result": result}, status_code=200, cookies={}, headers={}
+            body={**body, "result": result},
+            status_code=200,
+            cookies={},
+            headers={},
         )
 
         yield conn, params

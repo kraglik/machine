@@ -10,7 +10,9 @@ class RESTErrorPlugin(Plugin):
     def __init__(self, renderer: ErrorRenderer):
         self._renderer = renderer
 
-    async def __call__(self, conn: Connection, params: Parameters) -> PluginResult:
+    async def __call__(
+        self, conn: Connection, params: Parameters
+    ) -> PluginResult:
         try:
             yield conn, params
         except Exception as e:

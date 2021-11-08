@@ -22,5 +22,9 @@ api_v2 = sequence(
 
 
 api = sequence(
-    [rest_error_plugin(DefaultErrorRenderer()), path("/api"), options([api_v1, api_v2])]
+    [
+        rest_error_plugin(DefaultErrorRenderer()),
+        path("/api"),
+        options([api_v1, api_v2]),
+    ]
 )

@@ -47,6 +47,8 @@ async def greet(request: Request) -> Response:
 
     todos = await db.all()
 
+    now = datetime.datetime.now().astimezone().strftime("%d-%m-%Y %T %z")
+
     return HTMLResponse(
         f"""
             <h1>Hello, {name}!</h1></br>
@@ -57,6 +59,6 @@ async def greet(request: Request) -> Response:
         + "</ul>"
         + f"""
         </br>
-        Server time is <b>{datetime.datetime.now().astimezone().strftime('%d-%m-%Y %T %z')}</b>
+        Server time is <b>{now}</b>
         """
     )

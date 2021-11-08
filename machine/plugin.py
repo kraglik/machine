@@ -7,6 +7,8 @@ from .types import PluginResult
 
 class Plugin(ABC):
     @abstractmethod
-    async def __call__(self, conn: Connection, params: Parameters) -> PluginResult:
+    async def __call__(
+        self, conn: Connection, params: Parameters
+    ) -> PluginResult:
         raise NotImplementedError
         yield conn, params

@@ -23,7 +23,9 @@ class Accepts(Plugin):
                 self.CONTENT_TYPES_MAP.get(content_type, [content_type])
             )
 
-    async def __call__(self, conn: Connection, params: Parameters) -> PluginResult:
+    async def __call__(
+        self, conn: Connection, params: Parameters
+    ) -> PluginResult:
         if "*/*" in conn.accept or all(
             accepted in conn.accept for accepted in self._accepted
         ):

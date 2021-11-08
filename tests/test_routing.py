@@ -11,33 +11,30 @@ v1echo = RESTResource()
 v1name = RESTResource()
 
 
-app.root = sequence([
-    rest_error_plugin(DefaultErrorRenderer()),
-    path('/api/v1'),
-    options([
-        sequence([
-            path('/echo$'),
-            v1echo
-        ]),
-        sequence([
-            path('/name/{name}$'),
-            v1name
-        ])
-    ])
-])
+app.root = sequence(
+    [
+        rest_error_plugin(DefaultErrorRenderer()),
+        path("/api/v1"),
+        options(
+            [
+                sequence([path("/echo$"), v1echo]),
+                sequence([path("/name/{name}$"), v1name]),
+            ]
+        ),
+    ]
+)
 
 
 @v1echo.post()
 async def echo(request: Request):
     return Response(
-        body=await request.body(),
-        content_type=request.content_type
+        body=await request.body(), content_type=request.content_type
     )
 
 
 @v1name.get()
 async def show_name(request: Request) -> Response:
-    return TextResponse(request.path_params['name'])
+    return TextResponse(request.path_params["name"])
 
 
 @pytest.fixture
@@ -50,7 +47,7 @@ def test_router(client):
     response = client.get("/")
     assert response.status_code == 404
 
-    response = client.get("/api/v1/echo", json={'hello': 'world'})
+    response = client.get("/api/v1/echo", json={"hello": "world"})
     assert response.status_code == 405
 
     response = client.get("/api/v1/echo")
@@ -61,5 +58,4 @@ def test_router(client):
 
     response = client.get("/api/v1/name/machine")
     assert response.status_code == 200
-    assert response.text == 'machine'
-
+    assert response.text == "machine"

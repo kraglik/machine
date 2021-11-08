@@ -16,9 +16,13 @@ class Dependency(Plugin):
     def __init__(self, name: str, resource_gen: DependencyGenerator):
         self._name = name
         self._resource_gen = resource_gen
-        self._accepts_conn_and_params = len(signature(resource_gen).parameters) == 2
+        self._accepts_conn_and_params = (
+            len(signature(resource_gen).parameters) == 2
+        )
 
-    async def __call__(self, conn: Connection, params: Parameters) -> PluginResult:
+    async def __call__(
+        self, conn: Connection, params: Parameters
+    ) -> PluginResult:
         gen = (
             self._resource_gen(conn, params)  # type: ignore
             if self._accepts_conn_and_params
@@ -29,5 +33,7 @@ class Dependency(Plugin):
             yield conn, params.with_new_params({self._name: obj})
 
 
-def dependency(name: str, resource_gen: DependencyGenerator) -> PluginGenerator:
+def dependency(
+    name: str, resource_gen: DependencyGenerator
+) -> PluginGenerator:
     return lambda: Dependency(name, resource_gen)

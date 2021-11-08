@@ -1,9 +1,10 @@
 from dataclasses import dataclass
-from typing import Dict, Tuple, Union, Any, Optional
+from typing import Dict, Tuple, Any, Optional
 
 from machine.connection import Connection
 from machine.enums import HTTPMethod
 from machine.params import Parameters
+from machine.types import JsonType
 
 
 @dataclass(frozen=True)
@@ -28,9 +29,7 @@ class Request:
     async def text(self, encoding: str = "utf-8") -> str:
         return await self.conn.text(encoding=encoding)
 
-    async def json(
-        self, encoding: str = "utf-8"
-    ) -> Union[bool, float, int, str, list, dict]:
+    async def json(self, encoding: str = "utf-8") -> JsonType:
         return await self.conn.json(encoding=encoding)
 
     async def next_chunk(self) -> Optional[bytes]:
@@ -58,9 +57,9 @@ class Request:
             host=(conn.server_host, conn.server_port),
             client=(conn.client_host, conn.client_port),
             http_version=conn.http_version or "1.0",
-            content_type=conn.request_headers.get("content-type", b"text/plain").decode(
-                "utf-8"
-            ),
+            content_type=conn.request_headers.get(
+                "content-type", b"text/plain"
+            ).decode("utf-8"),
             query_params=conn.query_params,
             path_params=params.path.params,
             params=params.params,

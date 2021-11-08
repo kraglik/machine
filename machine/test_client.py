@@ -1,13 +1,9 @@
-# Copied from https://github.com/encode/starlette/blob/master/starlette/testclient.py
-
 import asyncio
 import contextlib
 import http
 import inspect
 import io
-import json
 import math
-import queue
 import sys
 import types
 import typing
@@ -62,7 +58,9 @@ class _MockOriginalResponse:
     it was made using urllib3.
     """
 
-    def __init__(self, headers: typing.List[typing.Tuple[bytes, bytes]]) -> None:
+    def __init__(
+        self, headers: typing.List[typing.Tuple[bytes, bytes]]
+    ) -> None:
         self.msg = _HeaderDict(headers)
         self.closed = False
 
@@ -94,7 +92,9 @@ class _WrapASGI2:
     def __init__(self, app: ASGI2App) -> None:
         self.app = app
 
-    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+    async def __call__(
+        self, scope: Scope, receive: Receive, send: Send
+    ) -> None:
         instance = self.app(scope)
         await instance(receive, send)
 
@@ -118,7 +118,10 @@ class _ASGIAdapter(requests.adapters.HTTPAdapter):
         self.portal_factory = portal_factory
 
     def send(
-        self, request: requests.PreparedRequest, *args: typing.Any, **kwargs: typing.Any
+        self,
+        request: requests.PreparedRequest,
+        *args: typing.Any,
+        **kwargs: typing.Any,
     ) -> requests.Response:
         scheme, netloc, path, query, fragment = (
             str(item) for item in urlsplit(request.url)
@@ -187,7 +190,11 @@ class _ASGIAdapter(requests.adapters.HTTPAdapter):
                     chunk = body.send(None)
                     if isinstance(chunk, str):
                         chunk = chunk.encode("utf-8")
-                    return {"type": "http.request", "body": chunk, "more_body": True}
+                    return {
+                        "type": "http.request",
+                        "body": chunk,
+                        "more_body": True,
+                    }
                 except StopIteration:
                     request_complete = True
                     return {"type": "http.request", "body": b""}
@@ -217,9 +224,10 @@ class _ASGIAdapter(requests.adapters.HTTPAdapter):
                 )
                 response_started = True
             elif message["type"] == "http.response.body":
-                assert (
-                    response_started
-                ), 'Received "http.response.body" without "http.response.start".'
+                assert response_started, (
+                    'Received "http.response.body"'
+                    ' without "http.response.start".'
+                )
                 assert (
                     not response_complete.is_set()
                 ), 'Received "http.response.body" after response completed.'
@@ -286,7 +294,7 @@ class TestClient(requests.Session):
             asgi_app = app
         else:
             app = typing.cast(ASGI2App, app)
-            asgi_app = _WrapASGI2(app)  #  type: ignore
+            asgi_app = _WrapASGI2(app)  # type: ignore
         adapter = _ASGIAdapter(
             asgi_app,
             portal_factory=self._portal_factory,
@@ -381,7 +389,9 @@ class TestClient(requests.Session):
     async def lifespan(self) -> None:
         scope = {"type": "lifespan"}
         try:
-            await self.app(scope, self.stream_receive.receive, self.stream_send.send)
+            await self.app(
+                scope, self.stream_receive.receive, self.stream_send.send
+            )
         finally:
             await self.stream_send.send(None)
 

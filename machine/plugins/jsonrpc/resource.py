@@ -1,8 +1,6 @@
 from typing import Optional, Dict, List, Callable
 
 from machine.resource import Resource
-from machine.plugin import Plugin
-from machine.plugins.options import options
 from machine.plugins.sequence import sequence
 from machine.plugins.conn_type import conn_type
 from machine.plugins.content_type import content_type

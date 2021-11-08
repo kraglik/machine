@@ -9,7 +9,9 @@ class ConnType(Plugin):
     def __init__(self, connection_type: str):
         self._connection_type = connection_type
 
-    async def __call__(self, conn: Connection, params: Parameters) -> PluginResult:
+    async def __call__(
+        self, conn: Connection, params: Parameters
+    ) -> PluginResult:
         if conn.type == self._connection_type:
             yield conn, params
             return

@@ -1,5 +1,4 @@
 from abc import ABC
-from typing import Any
 
 from machine.exceptions.machine import MachineError
 from machine.types import JsonType
@@ -56,6 +55,8 @@ class JsonRPCInternalError(MachineJsonRPCResponseError):
     status_code = 500
     error_code = 8005
 
-    def __init__(self, message: str, method_name: str, request_id: JsonType) -> None:
+    def __init__(
+        self, message: str, method_name: str, request_id: JsonType
+    ) -> None:
         super().__init__(method_name=method_name, request_id=request_id)
         self.message = message

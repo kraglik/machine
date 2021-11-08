@@ -5,7 +5,7 @@ from typing import Union, List, Dict, Optional
 
 from .enums import SendEventType, HTTPMethod
 from .exceptions import ConnectionClosed
-from .types import BodyType, Address, Receive, Send, Scope
+from .types import BodyType, Address, Receive, Send, Scope, JsonType
 
 END_EVENT = {"http": SendEventType.HTTP_RESPONSE_BODY}
 
@@ -55,7 +55,9 @@ class Connection:
         }
         self._response_cookies: Dict[str, bytes] = {}
         self._query_params: Dict[str, str] = (
-            {k: v for k, v in URL(self._url).query.items()} if self._url else {}
+            {k: v for k, v in URL(self._url).query.items()}
+            if self._url
+            else {}
         )
         self._head_sent = False
         self._accept = [
@@ -91,7 +93,7 @@ class Connection:
     async def text(self, encoding: str = "utf-8") -> str:
         return (await self.body()).decode(encoding=encoding)
 
-    async def json(self, encoding: str = "utf-8") -> Union[dict, list, float, int, str]:
+    async def json(self, encoding: str = "utf-8") -> JsonType:
         return json.loads((await self.text(encoding=encoding)))
 
     async def _read_next_chunk(self) -> bytes:
@@ -212,8 +214,12 @@ class Connection:
     def closed(self) -> bool:
         return self._closed
 
-    async def _send_chunk(self, chunk: bytes, event_type: str, is_end: bool) -> None:
-        await self._send({"type": event_type, "body": chunk, "more_body": not is_end})
+    async def _send_chunk(
+        self, chunk: bytes, event_type: str, is_end: bool
+    ) -> None:
+        await self._send(
+            {"type": event_type, "body": chunk, "more_body": not is_end}
+        )
 
     async def _send_end(self, event_type: str) -> None:
 
@@ -237,7 +243,8 @@ class Connection:
         )
 
         if not any(
-            header == "content-type" for header, _ in self._response_headers.items()
+            header == "content-type"
+            for header, _ in self._response_headers.items()
         ):
             self._response_headers.update(
                 {"content-type": content_type.encode("utf-8")}
@@ -267,7 +274,9 @@ class Connection:
         self, status_code: int, headers: Optional[Dict[str, str]] = None
     ) -> None:
         await self.send_head(
-            status_code=status_code, headers=headers or {}, content_type="text/html"
+            status_code=status_code,
+            headers=headers or {},
+            content_type="text/html",
         )
 
     async def send_body(
@@ -289,7 +298,9 @@ class Connection:
                 break
 
             await self._send_chunk(
-                chunk=chunk, event_type=SendEventType.HTTP_RESPONSE_BODY, is_end=False
+                chunk=chunk,
+                event_type=SendEventType.HTTP_RESPONSE_BODY,
+                is_end=False,
             )
 
     async def send_chunk(
@@ -298,7 +309,9 @@ class Connection:
         is_end: bool = False,
         event_type: str = SendEventType.HTTP_RESPONSE_BODY,
     ) -> None:
-        await self._send_chunk(chunk=chunk, event_type=event_type, is_end=is_end)
+        await self._send_chunk(
+            chunk=chunk, event_type=event_type, is_end=is_end
+        )
 
     async def send_content(
         self,

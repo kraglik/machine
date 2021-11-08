@@ -7,10 +7,7 @@ app = Machine()
 
 rpc = JsonRPCResource()
 
-app.root = sequence([
-    path('/api/public/jsonrpc$'),
-    rpc
-])
+app.root = sequence([path("/api/public/jsonrpc$"), rpc])
 
 
 @rpc.method()
@@ -38,7 +35,7 @@ def test_jsonrpc(client):
             "id": "1",
             "jsonrpc": "2.0",
             "method": method_name,
-            "params": params
+            "params": params,
         }
 
     def jsonrpc_response(method_name: str, result) -> dict:
@@ -46,31 +43,23 @@ def test_jsonrpc(client):
             "id": "1",
             "jsonrpc": "2.0",
             "method": method_name,
-            "result": result
+            "result": result,
         }
 
     response = client.get("/api/public/jsonrpc")
     assert response.status_code == 405
 
-    response = client.post(
-        "/api/public/jsonrpc",
-        json={
-            'hello': 'world'
-        }
-    )
+    response = client.post("/api/public/jsonrpc", json={"hello": "world"})
     assert response.status_code == 400
 
     response = client.post(
-        "/api/public/jsonrpc",
-        json=jsonrpc_request('echo', {'hello': 'world'})
+        "/api/public/jsonrpc", json=jsonrpc_request("echo", {"hello": "world"})
     )
     assert response.status_code == 200
-    assert response.json() == jsonrpc_response('echo', {'hello': 'world'})
+    assert response.json() == jsonrpc_response("echo", {"hello": "world"})
 
     response = client.post(
-        "/api/public/jsonrpc",
-        json=jsonrpc_request('echo', 1)
+        "/api/public/jsonrpc", json=jsonrpc_request("echo", 1)
     )
     assert response.status_code == 200
-    assert response.json() == jsonrpc_response('echo', 1)
-
+    assert response.json() == jsonrpc_response("echo", 1)

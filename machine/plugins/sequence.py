@@ -1,4 +1,4 @@
-from typing import List, AsyncIterator, Tuple
+from typing import List
 
 from machine.params import Parameters
 from machine.plugin import Plugin
@@ -11,14 +11,15 @@ class Sequence(Plugin):
         assert len(plugins) > 0, "Sequence cannot be empty!"
         self._plugins = plugins
 
-    async def __call__(self, conn: Connection, params: Parameters) -> PluginResult:
+    async def __call__(
+        self, conn: Connection, params: Parameters
+    ) -> PluginResult:
         applied_plugins: List[PluginResult] = []
 
         try:
             for plugin_gen in self._plugins:
                 plugin = plugin_gen()(conn, params)
 
-                # for some reason, anext is not defined in some versions of python
                 conn, params = await plugin.__anext__()
                 applied_plugins.append(plugin)
 

@@ -1,17 +1,15 @@
 from typing import Optional, Dict, List, Callable
 
 from machine.resource import Resource
-from machine.plugin import Plugin
-from machine.plugins.options import options
 from machine.plugins.sequence import sequence
 from machine.plugins.conn_type import conn_type
-from machine.plugins.method import method
 from machine.plugins.path import path
 from .error_plugin import rest_error_plugin
 from .handler import RESTHandler
 from machine.types import PluginGenerator, PluginType
 from .error_renderer import ErrorRenderer, DefaultErrorRenderer
 from .method_selector import method_selector
+from .types import RESTMethod
 
 
 class RESTResource(Resource):
@@ -59,27 +57,27 @@ class RESTResource(Resource):
 
     def get(
         self, plugins: List[PluginGenerator] = None
-    ) -> Callable[[Callable], Callable]:
+    ) -> Callable[[RESTMethod], RESTMethod]:
         return self._method_setter("GET", plugins or [])
 
     def post(
         self, plugins: List[PluginGenerator] = None
-    ) -> Callable[[Callable], Callable]:
+    ) -> Callable[[RESTMethod], RESTMethod]:
         return self._method_setter("POST", plugins or [])
 
     def put(
         self, plugins: List[PluginGenerator] = None
-    ) -> Callable[[Callable], Callable]:
+    ) -> Callable[[RESTMethod], RESTMethod]:
         return self._method_setter("PUT", plugins or [])
 
     def update(
         self, plugins: List[PluginGenerator] = None
-    ) -> Callable[[Callable], Callable]:
+    ) -> Callable[[RESTMethod], RESTMethod]:
         return self._method_setter("UPDATE", plugins or [])
 
     def delete(
         self, plugins: List[PluginGenerator] = None
-    ) -> Callable[[Callable], Callable]:
+    ) -> Callable[[RESTMethod], RESTMethod]:
         return self._method_setter("DELETE", plugins or [])
 
     def head(

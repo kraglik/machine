@@ -1,14 +1,11 @@
-import pytest
-
 from machine import Machine
 from machine.plugins import sequence, options, rest
 
 app = Machine()
 
-app.root = sequence([
-    rest.rest_error_plugin(rest.DefaultErrorRenderer()),
-    options([])
-])
+app.root = sequence(
+    [rest.rest_error_plugin(rest.DefaultErrorRenderer()), options([])]
+)
 
 
 class StateTracker:
