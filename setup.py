@@ -18,7 +18,7 @@ setup(
     long_description=readme,
     long_description_content_type="text/markdown",
     name="machine-web",
-    version="0.0.2-1",
+    version="0.0.3",
     description="A simple plugin-based web framework",
     python_requires="==3.*,>=3.8.0",
     project_urls={

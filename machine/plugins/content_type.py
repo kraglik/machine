@@ -2,7 +2,7 @@ from machine.connection import Connection
 from machine.exceptions.machine import UnexpectedContentType
 from machine.params import Parameters
 from machine.plugin import Plugin
-from machine.types import PluginResult, PluginGenerator
+from machine.plugin import PluginResult, PluginGenerator
 
 
 class ContentType(Plugin):

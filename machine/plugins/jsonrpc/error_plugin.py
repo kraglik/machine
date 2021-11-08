@@ -5,7 +5,7 @@ from machine.exceptions.plugins.jsonrpc import (
     MachineJsonRPCResponseError,
 )
 from machine.params import Parameters
-from machine.types import PluginGenerator, PluginResult
+from machine.plugin import PluginGenerator, PluginResult
 
 
 class JsonRPCErrorPlugin(Plugin):

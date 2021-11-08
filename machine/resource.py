@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from machine.types import PluginType
+from machine.plugin import PluginType
 
 
 class Resource(ABC):

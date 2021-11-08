@@ -3,7 +3,7 @@ from machine.params import Parameters
 from machine.path import Path
 from machine.connection import Connection
 from machine.plugin import Plugin
-from machine.types import PluginGenerator, PluginResult
+from machine.plugin import PluginGenerator, PluginResult
 
 
 class PathPlugin(Plugin):

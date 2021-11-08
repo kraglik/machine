@@ -1,8 +1,16 @@
+import typing
+
 from abc import ABC, abstractmethod
 
 from .connection import Connection
 from .params import Parameters
-from .types import PluginResult
+
+
+PluginResult = typing.AsyncGenerator[
+    typing.Tuple[Connection, Parameters], None
+]
+PluginType = typing.Callable[[Connection, Parameters], PluginResult]
+PluginGenerator = typing.Callable[[], PluginType]
 
 
 class Plugin(ABC):

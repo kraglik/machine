@@ -1,8 +1,6 @@
 from dataclasses import dataclass
 from typing import Dict, Any
 
-from machine.connection import Connection
-
 
 @dataclass(frozen=True)
 class PathParameters:
@@ -10,7 +8,7 @@ class PathParameters:
     params: Dict[str, str]
 
     @staticmethod
-    def from_conn(conn: Connection) -> "PathParameters":
+    def from_conn(conn) -> "PathParameters":  # type: ignore
         return PathParameters(remaining=conn.path or "", params={})
 
 
@@ -20,7 +18,7 @@ class Parameters:
     params: Dict[str, Any]
 
     @staticmethod
-    def from_conn(conn: Connection) -> "Parameters":
+    def from_conn(conn) -> "Parameters":  # type: ignore
         return Parameters(path=PathParameters.from_conn(conn), params={})
 
     def with_updated_path(

@@ -4,7 +4,7 @@ from inspect import signature
 from machine.connection import Connection
 from machine.params import Parameters
 from machine.plugin import Plugin
-from machine.types import PluginGenerator, PluginResult
+from machine.plugin import PluginGenerator, PluginResult
 
 DependencyGenerator = Union[
     Callable[[], AsyncGenerator[Any, None]],

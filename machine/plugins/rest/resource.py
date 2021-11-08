@@ -6,7 +6,7 @@ from machine.plugins.conn_type import conn_type
 from machine.plugins.path import path
 from .error_plugin import rest_error_plugin
 from .handler import RESTHandler
-from machine.types import PluginGenerator, PluginType
+from machine.plugin import PluginGenerator, PluginType
 from .error_renderer import ErrorRenderer, DefaultErrorRenderer
 from .method_selector import method_selector
 from .types import RESTMethod

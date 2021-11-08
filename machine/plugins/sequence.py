@@ -3,7 +3,7 @@ from typing import List
 from machine.params import Parameters
 from machine.plugin import Plugin
 from machine.connection import Connection
-from machine.types import PluginGenerator, PluginResult
+from machine.plugin import PluginGenerator, PluginResult
 
 
 class Sequence(Plugin):

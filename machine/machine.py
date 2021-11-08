@@ -6,13 +6,13 @@ import uvicorn
 from .params import Parameters
 from .connection import Connection
 from .types import (
-    PluginGenerator,
     StartupHandler,
     ShutdownHandler,
     Receive,
     Send,
     Scope,
 )
+from .plugin import PluginGenerator
 
 logger = logging.getLogger("machine")
 

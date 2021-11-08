@@ -5,7 +5,8 @@ from machine.plugin import Plugin
 from machine.plugins.jsonrpc.types import RequestIDType
 from machine.plugins.sequence import sequence
 from machine.connection import Connection
-from machine.types import PluginGenerator, JsonType, PluginResult
+from machine.plugin import PluginGenerator, PluginResult
+from machine.types import JsonType
 from machine.exceptions.plugins.jsonrpc import MachineJsonRPCError
 from machine.exceptions.plugins.jsonrpc import JsonRPCInternalError
 from machine.exceptions.plugins.jsonrpc import JsonRPCMethodNotFoundError

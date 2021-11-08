@@ -2,7 +2,7 @@ from machine.connection import Connection
 from machine.exceptions.resource import MethodNotAllowedResourceError
 from machine.params import Parameters
 from machine.plugin import Plugin
-from machine.types import PluginGenerator, PluginResult
+from machine.plugin import PluginGenerator, PluginResult
 
 
 class Method(Plugin):

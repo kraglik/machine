@@ -4,7 +4,7 @@ from machine.params import Parameters
 from machine.connection import Connection
 from machine.exceptions.plugins.accept import UnsupportedResponseTypeError
 from machine.plugin import Plugin
-from machine.types import PluginResult
+from machine.plugin import PluginResult
 
 
 class Accepts(Plugin):

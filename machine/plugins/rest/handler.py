@@ -2,7 +2,7 @@ from typing import List
 
 from machine.plugin import Plugin
 from machine.connection import Connection
-from machine.types import PluginGenerator, PluginResult
+from machine.plugin import PluginGenerator, PluginResult
 from .request import Request
 from .response import Response, TextResponse, JSONResponse
 from machine.params import Parameters

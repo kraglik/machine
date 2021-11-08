@@ -2,8 +2,8 @@ from machine.plugin import Plugin
 from machine.connection import Connection
 from machine.params import Parameters
 from .error_renderer import ErrorRenderer
-from ...exceptions.machine import MachineError
-from ...types import PluginGenerator, PluginResult
+from machine.exceptions.machine import MachineError
+from machine.plugin import PluginGenerator, PluginResult
 
 
 class RESTErrorPlugin(Plugin):
