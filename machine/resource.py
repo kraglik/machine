@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
-from machine.plugin import Plugin
+from machine.types import PluginType
 
 
 class Resource(ABC):
     @abstractmethod
-    def __call__(self) -> Plugin:
+    def __call__(self) -> PluginType:
         raise NotImplementedError

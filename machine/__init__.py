@@ -8,12 +8,12 @@ from .params import Parameters
 from .types import PluginGenerator
 
 __all__ = [
-    'Machine',
-    'Connection',
-    'Plugin',
-    'Resource',
-    'Path',
-    'TestClient',
-    'Parameters',
-    'PluginGenerator'
+    "Machine",
+    "Connection",
+    "Plugin",
+    "Resource",
+    "Path",
+    "TestClient",
+    "Parameters",
+    "PluginGenerator",
 ]

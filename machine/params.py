@@ -10,11 +10,8 @@ class PathParameters:
     params: Dict[str, str]
 
     @staticmethod
-    def from_conn(conn: Connection) -> 'PathParameters':
-        return PathParameters(
-            remaining=conn.path,
-            params={}
-        )
+    def from_conn(conn: Connection) -> "PathParameters":
+        return PathParameters(remaining=conn.path or "", params={})
 
 
 @dataclass(frozen=True)
@@ -23,20 +20,13 @@ class Parameters:
     params: Dict[str, Any]
 
     @staticmethod
-    def from_conn(conn: Connection) -> 'Parameters':
+    def from_conn(conn: Connection) -> "Parameters":
+        return Parameters(path=PathParameters.from_conn(conn), params={})
+
+    def with_updated_path(self, params: Dict[str, str], remaining: str) -> "Parameters":
         return Parameters(
-            path=PathParameters.from_conn(conn),
-            params={}
+            path=PathParameters(remaining=remaining, params=params), params=self.params
         )
 
-    def with_updated_path(self, params: Dict[str, str], remaining: str) -> 'Parameters':
-        return Parameters(
-            path=PathParameters(remaining=remaining, params=params),
-            params=self.params
-        )
-
-    def with_new_params(self, new_params: Dict[str, Any]) -> 'Parameters':
-        return Parameters(
-            path=self.path,
-            params={**self.params, **new_params}
-        )
+    def with_new_params(self, new_params: Dict[str, Any]) -> "Parameters":
+        return Parameters(path=self.path, params={**self.params, **new_params})

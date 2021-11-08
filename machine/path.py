@@ -19,7 +19,7 @@ class Path:
 
         return Right((match.groupdict(), path[end:]))
 
-    def _format_pattern(self, path):
+    def _format_pattern(self, path: str) -> str:
         if not re.search(self._param_regex, path):
             return path
 
@@ -27,12 +27,12 @@ class Path:
         last_pos = 0
 
         for match in re.finditer(self._param_regex, path):
-            regex += path[last_pos: match.start()]
+            regex += path[last_pos : match.start()]
             param = match.group("param")
             regex += r"(?P<%s>\w+)" % param
             last_pos = match.end()
 
         return regex
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Path('{self._pattern}')"

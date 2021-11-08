@@ -1,15 +1,12 @@
 from abc import ABC, abstractmethod
-from typing import Tuple, AsyncIterator
 
 from .connection import Connection
 from .params import Parameters
+from .types import PluginResult
 
 
 class Plugin(ABC):
     @abstractmethod
-    async def __call__(
-            self,
-            conn: Connection,
-            params: Parameters
-    ) -> AsyncIterator[Tuple[Connection, Parameters]]:
+    async def __call__(self, conn: Connection, params: Parameters) -> PluginResult:
         raise NotImplementedError
+        yield conn, params

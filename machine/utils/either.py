@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import Any
 
 
 class Either(ABC):
@@ -8,7 +9,7 @@ class Either(ABC):
 
     @property
     @abstractmethod
-    def value(self):
+    def value(self) -> Any:
         raise NotImplementedError
 
     @abstractmethod
@@ -17,12 +18,11 @@ class Either(ABC):
 
 
 class Left(Either):
-
-    def __init__(self, value = None):
+    def __init__(self, value: Any = None):
         self._value = value
 
     @property
-    def value(self):
+    def value(self) -> Any:
         return self._value
 
     def is_left(self) -> bool:
@@ -33,12 +33,11 @@ class Left(Either):
 
 
 class Right(Either):
-
-    def __init__(self, value):
+    def __init__(self, value: Any):
         self._value = value
 
     @property
-    def value(self):
+    def value(self) -> Any:
         return self._value
 
     def is_left(self) -> bool:

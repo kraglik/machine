@@ -3,14 +3,14 @@ from machine.params import Parameters
 from machine.path import Path
 from machine.connection import Connection
 from machine.plugin import Plugin
-from machine.types import PluginGenerator
+from machine.types import PluginGenerator, PluginResult
 
 
 class PathPlugin(Plugin):
     def __init__(self, path_string: str):
         self._path = Path(path_string)
 
-    async def __call__(self, conn: Connection, params: Parameters):
+    async def __call__(self, conn: Connection, params: Parameters) -> PluginResult:
         result = self._path.parse(params.path.remaining)
 
         if result.is_left():

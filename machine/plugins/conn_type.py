@@ -2,14 +2,14 @@ from machine.connection import Connection
 from machine.exceptions.plugins.conn_type import UnsupportedConnectionType
 from machine.params import Parameters
 from machine.plugin import Plugin
-from machine.types import PluginGenerator
+from machine.types import PluginGenerator, PluginResult
 
 
 class ConnType(Plugin):
     def __init__(self, connection_type: str):
         self._connection_type = connection_type
 
-    async def __call__(self, conn: Connection, params: Parameters):
+    async def __call__(self, conn: Connection, params: Parameters) -> PluginResult:
         if conn.type == self._connection_type:
             yield conn, params
             return

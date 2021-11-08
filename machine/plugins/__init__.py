@@ -11,14 +11,14 @@ from .sequence import sequence
 
 
 __all__ = [
-    'options',
-    'sequence',
-    'content_type',
-    'dependency',
-    'accepts',
-    'conn_type',
-    'method',
-    'path',
-    'RESTResource',
-    'JsonRPCResource'
+    "options",
+    "sequence",
+    "content_type",
+    "dependency",
+    "accepts",
+    "conn_type",
+    "method",
+    "path",
+    "RESTResource",
+    "JsonRPCResource",
 ]

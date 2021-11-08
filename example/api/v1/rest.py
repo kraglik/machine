@@ -11,56 +11,39 @@ from machine.plugins.rest.response import Response, JSONResponse, HTMLResponse
 todo_r = RESTResource()
 name_r = RESTResource()
 
-db_plugin = dependency('db', session)
+db_plugin = dependency("db", session)
 
 
 @todo_r.get(plugins=[db_plugin])
 async def todo_list_get(request: Request) -> Response:
-    db: Todos = request.params['db']
-    return JSONResponse(
-        {
-            "todos": await db.all()
-        },
-        status_code=200
-    )
+    db: Todos = request.params["db"]
+    return JSONResponse({"todos": await db.all()}, status_code=200)
 
 
 @todo_r.post(plugins=[db_plugin])
 async def todo_create(request: Request) -> Response:
-    db: Todos = request.params['db']
+    db: Todos = request.params["db"]
     todo = await request.text()
 
     await db.add(todo)
 
-    return JSONResponse(
-        {
-            "todo": todo,
-            "status": "added"
-        },
-        status_code=200
-    )
+    return JSONResponse({"todo": todo, "status": "added"}, status_code=200)
 
 
 @todo_r.delete(plugins=[db_plugin])
 async def todo_delete(request: Request) -> Response:
-    db: Todos = request.params['db']
+    db: Todos = request.params["db"]
     todo = await request.text()
 
     await db.remove(todo)
 
-    return JSONResponse(
-        {
-            "todo": todo,
-            "status": "deleted"
-        },
-        status_code=200
-    )
+    return JSONResponse({"todo": todo, "status": "deleted"}, status_code=200)
 
 
 @name_r.get(plugins=[db_plugin])
 async def greet(request: Request) -> Response:
-    db: Todos = request.params['db']
-    name: str = request.path_params['name']
+    db: Todos = request.params["db"]
+    name: str = request.path_params["name"]
 
     todos = await db.all()
 
@@ -70,7 +53,7 @@ async def greet(request: Request) -> Response:
             <h2>Here are your todos:</h2></br>
             <ul>
         """
-        + ''.join(f"<li>{todo}</li>" for todo in todos)
+        + "".join(f"<li>{todo}</li>" for todo in todos)
         + "</ul>"
         + f"""
         </br>

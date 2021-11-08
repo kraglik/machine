@@ -2,7 +2,7 @@ from machine.connection import Connection
 from machine.exceptions.resource import MethodNotAllowedResourceError
 from machine.params import Parameters
 from machine.plugin import Plugin
-from machine.types import PluginGenerator
+from machine.types import PluginGenerator, PluginResult
 
 
 class Method(Plugin):
@@ -11,7 +11,7 @@ class Method(Plugin):
         self._allowed = allowed
         self._only = only
 
-    async def __call__(self, conn: Connection, params: Parameters):
+    async def __call__(self, conn: Connection, params: Parameters) -> PluginResult:
         method_match = conn.method.value == self._method
 
         if not method_match and self._only:
@@ -24,5 +24,7 @@ class Method(Plugin):
         raise MethodNotAllowedResourceError()
 
 
-def method(method_name: str, allowed: bool = True, only: bool = False) -> PluginGenerator:
+def method(
+    method_name: str, allowed: bool = True, only: bool = False
+) -> PluginGenerator:
     return lambda: Method(method_name, allowed, only)

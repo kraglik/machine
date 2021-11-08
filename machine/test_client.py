@@ -70,11 +70,6 @@ class _MockOriginalResponse:
         return self.closed
 
 
-class _Upgrade(Exception):
-    def __init__(self, session: "WebSocketTestSession") -> None:
-        self.session = session
-
-
 def _get_reason_phrase(status_code: int) -> str:
     try:
         return http.HTTPStatus(status_code).phrase
@@ -152,7 +147,7 @@ class _ASGIAdapter(requests.adapters.HTTPAdapter):
             for key, value in request.headers.items()
         ]
 
-        scope = {
+        scope: typing.Dict[str, typing.Any] = {
             "type": "http",
             "http_version": "1.1",
             "method": request.method,

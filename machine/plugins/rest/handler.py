@@ -1,18 +1,18 @@
-from typing import List
+from typing import List, Callable
 
 from machine.plugin import Plugin
 from machine.connection import Connection
-from machine.types import PluginGenerator
+from machine.types import PluginGenerator, PluginResult
 from .request import Request
 from .response import Response, TextResponse, JSONResponse
 from machine.params import Parameters
 
 
 class RESTHandlerPlugin(Plugin):
-    def __init__(self, method):
+    def __init__(self, method: Callable) -> None:
         self._method = method
 
-    async def __call__(self, conn: Connection, params: Parameters):
+    async def __call__(self, conn: Connection, params: Parameters) -> PluginResult:
         request = Request.from_conn(conn, params)
         response = await self._method(request)
 
@@ -28,24 +28,24 @@ class RESTHandlerPlugin(Plugin):
             status_code=response.status_code,
             headers=response.headers,
             cookies=response.cookies,
-            content_type=response.content_type
+            content_type=response.content_type,
         )
 
         yield conn, params
 
 
 class RESTHandler:
-    def __init__(self, plugins: List[PluginGenerator], handler):
+    def __init__(self, plugins: List[PluginGenerator], handler: Callable):
         self._plugins = plugins
         self._handler = handler
 
     @property
-    def handler(self):
+    def handler(self) -> Callable:
         return self._handler
 
     @property
-    def plugins(self):
+    def plugins(self) -> List[PluginGenerator]:
         return self._plugins
 
-    def __call__(self):
+    def __call__(self) -> Callable[[], Plugin]:
         return lambda: RESTHandlerPlugin(method=self._handler)

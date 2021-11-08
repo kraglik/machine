@@ -3,14 +3,14 @@ from machine.connection import Connection
 from machine.params import Parameters
 from .error_renderer import ErrorRenderer
 from ...exceptions.machine import MachineError
-from ...types import PluginGenerator
+from ...types import PluginGenerator, PluginResult
 
 
 class RESTErrorPlugin(Plugin):
     def __init__(self, renderer: ErrorRenderer):
         self._renderer = renderer
 
-    async def __call__(self, conn: Connection, params: Parameters):
+    async def __call__(self, conn: Connection, params: Parameters) -> PluginResult:
         try:
             yield conn, params
         except Exception as e:

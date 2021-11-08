@@ -1,9 +1,9 @@
-from typing import List, AsyncIterator
+from typing import List, AsyncIterator, Tuple
 
 from machine.params import Parameters
 from machine.plugin import Plugin
 from machine.connection import Connection
-from machine.types import PluginGenerator
+from machine.types import PluginGenerator, PluginResult
 
 
 class Sequence(Plugin):
@@ -11,8 +11,8 @@ class Sequence(Plugin):
         assert len(plugins) > 0, "Sequence cannot be empty!"
         self._plugins = plugins
 
-    async def __call__(self, conn: Connection, params: Parameters):
-        applied_plugins: List[AsyncIterator] = []
+    async def __call__(self, conn: Connection, params: Parameters) -> PluginResult:
+        applied_plugins: List[PluginResult] = []
 
         try:
             for plugin_gen in self._plugins:
@@ -34,8 +34,10 @@ class Sequence(Plugin):
 
         except Exception as exception:
             error = exception
-            for plugin in reversed(applied_plugins):
+
+            while len(applied_plugins) > 0:
                 try:
+                    plugin = applied_plugins.pop(-1)
                     await plugin.athrow(error)
                     break
                 except Exception as e:

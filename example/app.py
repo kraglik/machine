@@ -12,5 +12,5 @@ app = Machine()
 app.root = api
 
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8000, log_level='info')
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=8000, log_level="info")

@@ -1,4 +1,4 @@
-from typing import Optional, Dict, List
+from typing import Optional, Dict, List, Callable
 
 from machine.resource import Resource
 from machine.plugin import Plugin
@@ -17,33 +17,34 @@ from ..rest.error_renderer import DefaultErrorRenderer
 
 class JsonRPCResource(Resource):
 
-    _disallowed_methods = ['GET', 'PUT', 'HEAD', 'DELETE', 'UPDATE']
+    _disallowed_methods = ["GET", "PUT", "HEAD", "DELETE", "UPDATE"]
 
     def __init__(self, path: Optional[str] = None):
-        self._method_table: Dict[str, Optional[JsonRPCHandler]] = {}
+        self._method_table: Dict[str, JsonRPCHandler] = {}
         self._path = path
 
-    def _handler(self):
+    def _handler(self) -> Callable[[], JsonRPCHandlerPlugin]:
         return lambda: JsonRPCHandlerPlugin(methods=self._method_table)
 
     def __call__(self) -> PluginType:
         prefix = [
-            conn_type('http'),
+            conn_type("http"),
             rest_error_plugin(renderer=DefaultErrorRenderer()),
-            method('POST', only=True),
-            content_type('application/json'),
+            method("POST", only=True),
+            content_type("application/json"),
             jsonrpc_error_plugin(),
         ]
         prefix += [] if self._path is None else [path(self._path)]
 
-        return sequence([
-            *prefix,
-            self._handler()
-        ])()
+        return sequence([*prefix, self._handler()])()
 
-    def method(self, plugins: List[PluginGenerator] = None):
-        def wrapper(handler):
-            self._method_table[handler.__name__] = JsonRPCHandler(plugins=plugins or [], method=handler)
+    def method(
+        self, plugins: List[PluginGenerator] = None
+    ) -> Callable[[Callable], Callable]:
+        def wrapper(handler: Callable) -> Callable:
+            self._method_table[handler.__name__] = JsonRPCHandler(
+                plugins=plugins or [], method=handler
+            )
             return handler
 
         return wrapper
